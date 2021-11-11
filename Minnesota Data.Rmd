@@ -10,8 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-```{r}
-mn_test <- read_csv("/Users/evaairoldi/Desktop/comps/test_MN_data.csv")
+```{r exampleData}
+mn_test <- read_csv("/Users/evaairoldi/Desktop/comps/gerrymanderingComps/test_MN_data.csv")
 
 mn_work <- cbind("map" = c(1:nrow(mn_test)), mn_test)
 
@@ -20,8 +20,9 @@ mn_tidy <- mn_work %>%
                          names_to = c(".value", "district"),
                          names_sep = -1) 
 colnames(mn_tidy) <- colnames(mn_tidy) %>% str_replace_all("_", "")
-view(mn_tidy)
+```
 
+```{r readfcn_exampleData}
 read_clean <- function(url){
   data <- read_csv(url)
   data1 <- cbind("map" = c(1:nrow(data)), data)
@@ -34,7 +35,20 @@ read_clean <- function(url){
 }
 ```  
 
-```{r}
-mn <- 
+```{r data_1}
+mn <- read_csv("/Users/evaairoldi/Desktop/comps/gerrymanderingComps/MN_data.csv")
+nrow(mn)
+
+efficiency_dist <- ggplot(mn) +
+  geom_histogram(aes(efficiency_gap)) +
+  labs(title = "Minnesota Ensemble Distribution of Efficiency Gap", x="Efficiency Gap", subtitle = "For 2000 states without an acceptance function")
+efficiency_dist
+
+partisan_dist <- ggplot(mn) +
+  geom_histogram(aes(partisan_bias)) +
+  labs(title = "Minnesota Ensemble Distribution of Partisan Bias", x="Partisan Bias", subtitle = "For 2000 states without an acceptance function")
+partisan_dist
+
+
 ```
 
