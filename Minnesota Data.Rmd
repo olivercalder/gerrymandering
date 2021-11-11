@@ -1,7 +1,5 @@
 ---
 title: "Comps Data"
-author: "Eva Airoldi"
-date: "11/2/2021"
 output: pdf_document
 ---
 
@@ -35,7 +33,7 @@ read_clean <- function(url){
 }
 ```  
 
-```{r data_1}
+```{r data_1_distributions}
 mn <- read_csv("/Users/evaairoldi/Desktop/comps/gerrymanderingComps/MN_data.csv")
 nrow(mn)
 
@@ -48,7 +46,6 @@ partisan_dist <- ggplot(mn) +
   geom_histogram(aes(partisan_bias)) +
   labs(title = "Minnesota Ensemble Distribution of Partisan Bias", x="Partisan Bias", subtitle = "For 2000 states without an acceptance function")
 partisan_dist
-
 
 ```
 
