@@ -1,0 +1,40 @@
+---
+title: "Comps Data"
+author: "Eva Airoldi"
+date: "11/2/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+mn_test <- read_csv("/Users/evaairoldi/Desktop/comps/test_MN_data.csv")
+
+mn_work <- cbind("map" = c(1:nrow(mn_test)), mn_test)
+
+mn_tidy <- mn_work %>% 
+  pivot_longer(!c(map, efficiency_gap, mean_median, seats_won),
+                         names_to = c(".value", "district"),
+                         names_sep = -1) 
+colnames(mn_tidy) <- colnames(mn_tidy) %>% str_replace_all("_", "")
+view(mn_tidy)
+
+read_clean <- function(url){
+  data <- read_csv(url)
+  data1 <- cbind("map" = c(1:nrow(data)), data)
+  data_tidy <- data1 %>% 
+  pivot_longer(!c(map, efficiency_gap, mean_median, seats_won),
+                         names_to = c(".value", "district"),
+                         names_sep = -1) 
+  colnames(data_tidy) <- colnames(data_tidy) %>% str_replace_all("_", "")
+  return(data_tidy)
+}
+```  
+
+```{r}
+mn <- 
+```
+
