@@ -9,7 +9,7 @@ library(tidyverse)
 ```
 
 ```{r exampleData}
-mn_test <- read_csv("/Users/evaairoldi/Desktop/comps/gerrymanderingComps/test_MN_data.csv")
+mn_test <- read_csv("test_MN_data.csv")
 
 mn_work <- cbind("map" = c(1:nrow(mn_test)), mn_test)
 
@@ -34,7 +34,7 @@ read_clean <- function(url){
 ```  
 
 ```{r data_1_distributions}
-mn <- read_csv("/Users/evaairoldi/Desktop/comps/gerrymanderingComps/MN_data.csv")
+mn <- read_csv("MN_data.csv")
 nrow(mn)
 
 efficiency_dist <- ggplot(mn) +
@@ -42,10 +42,20 @@ efficiency_dist <- ggplot(mn) +
   labs(title = "Minnesota Ensemble Distribution of Efficiency Gap", x="Efficiency Gap", subtitle = "For 2000 states without an acceptance function")
 efficiency_dist
 
+efficiency_density <- ggplot(mn) +
+  geom_density(aes(efficiency_gap)) +
+  labs(title = "Minnesota Ensemble Density Distribution of Efficiency Gap", x="Efficiency Gap", subtitle = "For 2000 states without an acceptance function")
+efficiency_density
+
 partisan_dist <- ggplot(mn) +
   geom_histogram(aes(partisan_bias)) +
   labs(title = "Minnesota Ensemble Distribution of Partisan Bias", x="Partisan Bias", subtitle = "For 2000 states without an acceptance function")
 partisan_dist
+
+partisan_density <- ggplot(mn) +
+  geom_density(aes(partisan_bias)) +
+  labs(title = "Minnesota Ensemble Density Distribution of Partisan Bias", x="Partisan Bias", subtitle = "For 2000 states without an acceptance function")
+partisan_density
 
 ```
 

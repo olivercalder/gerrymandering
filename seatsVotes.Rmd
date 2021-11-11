@@ -1,0 +1,131 @@
+---
+title: "seatsVotes"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pscl)
+library(tidyverse)
+```
+
+```{r plot_procedure}
+#example of generating curve
+mn_example <- read.csv("exampleData.csv")
+
+map1d <- mn_example %>%
+  filter(map == 1) %>%
+  select(voteshareD)
+
+map1r <- mn_example %>%
+  filter(map == 1) %>%
+  select(voteshareR)
+
+map1d_sv <- seatsVotes(map1d)
+map1r_sv <- seatsVotes(map1r)
+
+plot(map1d_sv, legend = FALSE, col = "blue")
+par(new=TRUE)
+add_line(map1r_sv, col = "red")
+
+#example using function
+sv_curve(mn_example,89) #arguments are data set and map #
+```
+
+```{r sv_curve_function}
+#function to generate pair of functions (dem/rep)
+sv_curve <- function(data, map_choice){
+  map1d <- data %>%
+  filter(map == map_choice) %>%
+  select(voteshareD)
+
+  map1r <- data %>%
+  filter(map == map_choice) %>%
+  select(voteshareR)
+
+map1d_sv <- seatsVotes(map1d)
+map1r_sv <- seatsVotes(map1r)
+
+par(new=FALSE)
+plot(map1d_sv, col = "blue")
+par(new=TRUE)
+add_line(map1r_sv, col = "red")
+}
+```
+
+```{r add_line_function}
+#adjusted plot.seatsVotes function, stripped of some info so it layers cleaner (**it can still be made much cleaner**)
+add_line <-  function (x, type = c("seatsVotes", "density"), legend = "bottomright", 
+    transform = FALSE, col, ...) 
+{
+    if (!inherits(x, "seatsVotes")) 
+        cat("plot.svCurve only defined for objects of class seatsVotes\n")
+    type <- match.arg(type)
+    cl <- match.call()
+    if (type == "seatsVotes") {
+        oldpar <- par()
+        par(mar = c(4.2, 4, 5, 1), las = 1)
+        if (is.null(cl$xlab)) 
+            xlab <- "Average District Vote"
+        else xlab <- cl$xlab
+        if (is.null(cl$ylab)) 
+           ylab <- "Proportion of Seats Won"
+        else ylab <- cl$ylab
+        if (is.null(cl$xlim)) 
+            xlim <- c(0, 1)
+        else xlim <- cl$xlim
+        if (is.null(cl$ylim)) 
+            ylim <- c(0, 1)
+        else ylim <- cl$ylim
+        if (is.null(cl$xaxs)) 
+            xaxs <- "i"
+        else xaxs <- cl$xaxs
+        if (is.null(cl$yaxs)) 
+            yaxs <- "i"
+        else yaxs <- cl$yaxs
+        plot(x$v, x$s, type = "l", lwd = 3, axes = FALSE, xaxs = xaxs, 
+            yaxs = yaxs, xlim = xlim, ylim = ylim, xlab = xlab, 
+            ylab = ylab, col=col, ...)
+        axis(1, at = seq(0, 1, by = 0.25))
+        axis(2, at = seq(0, 1, by = 0.25))
+        abline(v = mean(x$x, na.rm = TRUE), lty = 2, col = col)
+        par(oldpar)
+    }
+    if (type == "density") {
+        if (is.null(cl$title)) {
+            if (is.null(x$desc)) 
+                titleString <- "Density"
+            else titleString <- paste("Density,", x$desc)
+        }
+        else titleString <- cl$title
+        if (is.null(cl$xlab)) 
+            xlab <- "Vote Shares"
+        else xlab <- cl$xlab
+        if (is.null(cl$ylab)) 
+            ylab <- ""
+        else ylab <- cl$ylab
+        if (transform) {
+            transFunc <- function(x) {
+                v <- log(x/(1 - x))
+                beta <- sqrt(3)
+                xstar <- v * beta
+                exp(xstar)/(1 + exp(xstar))
+            }
+            xLocal <- transFunc(x$x)
+        }
+        else xLocal <- x$x
+        plot(density(xLocal, na.rm = TRUE, from = min(xLocal, 
+            na.rm = TRUE), to = max(xLocal, na.rm = TRUE), ...), 
+            xlab = xlab, ylab = ylab, main = titleString, axes = FALSE)
+        if (transform) {
+            tcks <- pretty(x$x)
+            tcks <- transFunc(tcks)
+            axis(1, at = tcks, labels = pretty(x$x))
+        }
+        else axis(1)
+        rug(xLocal)
+    }
+    invisible(NULL)
+}
+```
+
