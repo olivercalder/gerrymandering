@@ -9,7 +9,7 @@ import random
 random.seed(1123)
 
 
-def run_chain():
+def get_chain():
     """
     Get data, build graph, make updaters and constraints, run chain 
     :return: chain 
@@ -23,8 +23,13 @@ def run_chain():
 
     # Make updaters 
     all_updaters = {"population": updaters.Tally(POPULATION_COL, alias="population")}
-    election = Election("SSEN16", {"Democratic": "SSEN16D", "Republican": "SSEN16R"}, alias="SSEN16")
-    all_updaters.update({election.name: election}) 
+    elections = [
+            Election('PRES16',  {'Democratic': 'PRES16D',   'Republican': 'PRES16R'}, alias='PRES16'),
+            Election('USH16',   {'Democratic':  'USH16D',   'Republican':  'USH16R'}, alias='USH16'),
+            Election('SSEN16',  {'Democratic': 'SSEN16D',   'Republican': 'SSEN16R'}, alias='SSEN16'),
+            Election('SH16',    {'Democratic':   'SH16D',   'Republican':   'SH16R'}, alias='SH16'),
+            ]
+    all_updaters.update({election.name: election for election in elections}) 
 
     initial_partition = GeographicPartition(graph, assignment=ASSIGNMENT_COL, updaters=all_updaters)
 
@@ -33,7 +38,7 @@ def run_chain():
     # We use functools.partial to bind the extra parameters (pop_col, pop_target, epsilon, node_repeats)
     # of the recom proposal.
     proposal = partial(recom,
-                    pop_col="TOTPOP",
+                    pop_col=POPULATION_COL,
                     pop_target=ideal_population,
                     epsilon=0.02,
                     node_repeats=2
@@ -59,10 +64,38 @@ def run_chain():
         ],
         accept=accept.always_accept,
         initial_state=initial_partition,
-        total_steps=5
+        total_steps=1000
     )
 
     return chain 
+
+
+def get_chain_data(chain):
+    return pandas.DataFrame(
+            sorted(partition["USH16"].percents("Democratic"))
+            for partition in chain.with_progress_bar())
+
+
+def display_chain_data(data):
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Draw 50% line
+    ax.axhline(0.5, color="#cccccc")
+
+    # Draw boxplot
+    data.boxplot(ax=ax, positions=range(len(data.columns)))
+
+    # Draw initial plan's Democratic vote %s (.iloc[0] gives the first row)
+    plt.plot(data.iloc[0], "ro")
+
+    # Annotate
+    ax.set_title("Comparing the 2011 plan to an ensemble")
+    ax.set_ylabel("Democratic vote % (US House 2016)")
+    ax.set_xlabel("Sorted districts")
+    ax.set_ylim(0, 1)
+    ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
+
+    plt.show()
 
 
 def explore_chain(chain):
@@ -109,8 +142,12 @@ def out_csv(chain):
 
 
 if __name__ == "__main__":
-    chain = run_chain()
+    chain = get_chain()
+    # data = get_chain_data(chain)
+    # display_chain_data(data)
+
     # explore_chain(chain)
+
     out_csv(chain) 
 
 
