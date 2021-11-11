@@ -9,6 +9,7 @@ library(tidyverse)
 ```
 
 ```{r exampleData}
+#basic cleaning process for csv with same form as first dataset
 mn_test <- read_csv("test_MN_data.csv")
 
 mn_work <- cbind("map" = c(1:nrow(mn_test)), mn_test)
@@ -21,6 +22,7 @@ colnames(mn_tidy) <- colnames(mn_tidy) %>% str_replace_all("_", "")
 ```
 
 ```{r readfcn_exampleData}
+#function to clean data structed same as sample data
 read_clean <- function(url){
   data <- read_csv(url)
   data1 <- cbind("map" = c(1:nrow(data)), data)
@@ -32,6 +34,12 @@ read_clean <- function(url){
   return(data_tidy)
 }
 ```  
+
+```{r}
+read.csv("MN_data2.csv")
+```
+
+
 
 ```{r data_1_distributions}
 mn <- read_csv("MN_data.csv")
