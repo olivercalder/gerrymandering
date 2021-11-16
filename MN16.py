@@ -4,24 +4,24 @@ from gerrychain import (GeographicPartition, Partition, Graph, MarkovChain,
 from gerrychain.proposals import recom
 from functools import partial
 import pandas
-import csv 
-import random 
+import csv
+import random
 random.seed(1123)
 
 
 def get_chain():
     """
-    Get data, build graph, make updaters and constraints, run chain 
-    :return: chain 
+    Get data, build graph, make updaters and constraints, run chain
+    :return: chain
     """
 
-    SHAPEFILE_PATH = "data/mn_mggg/MN16/mn_precincts16.shp" 
-    POPULATION_COL = "TOTPOP" 
+    SHAPEFILE_PATH = "data/mn_mggg/MN16/mn_precincts16.shp"
+    POPULATION_COL = "TOTPOP"
     ASSIGNMENT_COL = "CONGDIST"
 
     graph = Graph.from_file(SHAPEFILE_PATH)
 
-    # Make updaters 
+    # Make updaters
     all_updaters = {"population": updaters.Tally(POPULATION_COL, alias="population")}
     elections = [
             Election('PRES16',  {'Democratic': 'PRES16D',   'Republican': 'PRES16R'}, alias='PRES16'),
@@ -29,7 +29,7 @@ def get_chain():
             Election('SSEN16',  {'Democratic': 'SSEN16D',   'Republican': 'SSEN16R'}, alias='SSEN16'),
             Election('SH16',    {'Democratic':   'SH16D',   'Republican':   'SH16R'}, alias='SH16'),
             ]
-    all_updaters.update({election.name: election for election in elections}) 
+    all_updaters.update({election.name: election for election in elections})
 
     initial_partition = GeographicPartition(graph, assignment=ASSIGNMENT_COL, updaters=all_updaters)
 
@@ -67,7 +67,7 @@ def get_chain():
         total_steps=1000
     )
 
-    return chain 
+    return chain
 
 
 def get_chain_data(chain):
@@ -109,10 +109,10 @@ def explore_chain(chain):
 
 def out_csv(chain):
     with open("MN_data.csv", "w", newline="") as csvfile:
-        f = csv.writer(csvfile) 
+        f = csv.writer(csvfile)
         headings = ["State", "efficiency_gap", "partisan_bias", "d_seats", "r_seats"]
         num_dists = 8
-        # add vote count headings 
+        # add vote count headings
         for i in range(num_dists):
             headings.append("d_count_" + str(i))
             headings.append("r_count_" + str(i))
@@ -121,17 +121,17 @@ def out_csv(chain):
         state = 1
         for partition in chain:
 
-            # get election metrics, seats won and add to row 
+            # get election metrics, seats won and add to row
             e_g = partition["SSEN16"].efficiency_gap()
             p_b = partition["SSEN16"].partisan_bias()
             dem = partition["SSEN16"].wins("Democratic")
             rep = partition["SSEN16"].wins("Republican")
             row = [state, e_g, p_b, dem, rep]
 
-            # get lists of vote counts and add to row 
+            # get lists of vote counts and add to row
             dem_list = partition["SSEN16"].counts("Democratic")
             rep_list = partition["SSEN16"].counts("Republican")
-            assert num_dists == len(dem_list) 
+            assert num_dists == len(dem_list)
             for i in range(num_dists):
                 row.append(dem_list[i])
                 row.append(rep_list[i])
@@ -148,23 +148,23 @@ if __name__ == "__main__":
 
     # explore_chain(chain)
 
-    out_csv(chain) 
+    out_csv(chain)
 
 
 """
-Output we can get: 
-    Various election metrics 
-        Vote counts 
-        Mean-median 
-        Partisan bias 
-        etc. 
-    Partition characteristics 
+Output we can get:
+    Various election metrics
+        Vote counts
+        Mean-median
+        Partisan bias
+        etc.
+    Partition characteristics
         Area
         Perimeter
-        Cut edges 
-        Interior and exterior boundaries (?) 
+        Cut edges
+        Interior and exterior boundaries (?)
         All the node variables (see data readme):
             NH_WHITE
             NH_BLACK
-            etc 
+            etc
 """
