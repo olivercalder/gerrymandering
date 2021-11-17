@@ -145,13 +145,14 @@ def get_chain():
             "county_splits": updaters.county_splits("county_splits", "COUNTYNAME"),
             #"county_splits": updaters.CountySplit("county_splits", "COUNTYNAME"),  # TODO check on this one
             }
-    all_updaters.update({"county_splits": updaters.county_splits("county_splits", "COUNTYNAME")})
+
     elections = [
             Election('PRES16',  {'Democratic': 'PRES16D',   'Republican': 'PRES16R'}, alias='PRES16'),
             Election('USH16',   {'Democratic':  'USH16D',   'Republican':  'USH16R'}, alias='USH16'),
             Election('SSEN16',  {'Democratic': 'SSEN16D',   'Republican': 'SSEN16R'}, alias='SSEN16'),
             Election('SH16',    {'Democratic':   'SH16D',   'Republican':   'SH16R'}, alias='SH16'),
             ]
+
     all_updaters.update({election.name: election for election in elections})
 
     initial_partition = GeographicPartition(graph, assignment=ASSIGNMENT_COL, updaters=all_updaters)
