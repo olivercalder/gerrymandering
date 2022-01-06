@@ -7,7 +7,7 @@ import pandas
 import csv
 import random
 random.seed(1123)
-from math import exp 
+from math import exp
 
 
 def compute_population_score(partition):
@@ -41,8 +41,8 @@ def compute_compactness_score(partition):
 def get_districts_in_county_sorted_by_dominance(county_info, partition):
     # Sort districts in given county by their dominance
     # Dominant = highest proportion of district's precincts in given county
-    # county_info.contains{4, 8, 7} <- districts in county 
-    # Returns {8, 4, 7} <- same districts, sorted most-to-least dominant 
+    # county_info.contains{4, 8, 7} <- districts in county
+    # Returns {8, 4, 7} <- same districts, sorted most-to-least dominant
     return sorted(county_info.contains, reverse=True, key=lambda district:
             len([precinct for precinct in partition.parts[district] if precinct in county_info.nodes])
             / len(partition.parts[district]))
@@ -66,10 +66,10 @@ def get_f_scores(county_info, partition):
     # district with highest precinct percentage in the given county
     dominant_districts = get_districts_in_county_sorted_by_dominance(county_info, partition)
 
-    # precinct_counts_per_district = [0, 0, 0] <- 3=#districts in county 
-    # Becomes precinct_counts_per_district = [54, 38, 13] 
+    # precinct_counts_per_district = [0, 0, 0] <- 3=#districts in county
+    # Becomes precinct_counts_per_district = [54, 38, 13]
     #   <- number of precincts in those ditsricts (only those inside the county)
-    precinct_counts_per_district = [0 for i in range(len(dominant_districts))] 
+    precinct_counts_per_district = [0 for i in range(len(dominant_districts))]
     for precinct in county_info.nodes:
         for k in range(len(dominant_districts)):
             # k is the index of the district according to its dominance
@@ -80,7 +80,7 @@ def get_f_scores(county_info, partition):
 
     f_scores = [0 for i in range(len(dominant_districts))]
     total_precincts_in_county = len(county_info.nodes)
-    # first f score = # precincts in most dominant district / total precincts in county 
+    # first f score = # precincts in most dominant district / total precincts in county
     f_scores[0] = precinct_counts_per_district[0] / total_precincts_in_county
     for k in range(1, len(precinct_counts_per_district)):
         # Change to be count of precincts in the first k most dominant districts
@@ -95,29 +95,29 @@ def compute_county_split_score(partition):
     Returns a real-valued score >= 0 related to county splitting.
     Lower values mean fewer counties split, and splits are less dramatic.
     '''
-    # TODO: make sure f and W scores aren't off by 1 
+    # TODO: make sure f and W scores aren't off by 1
     # hopefully the number of counties which are split is >= the maximum number
     # of districts which split any given county
-    county_split_counts = [0 for i in range(len(partition.county_splits))] #[0, 0, 0, ..., 0] <- a 0 for every county 
+    county_split_counts = [0 for i in range(len(partition.county_splits))] #[0, 0, 0, ..., 0] <- a 0 for every county
     w_scores = [0.0 for i in range(len(partition.county_splits))]
     # w_scores[k] will hold the w_{2+k} score, where w_{2+k} is computed as:
     # w_{2+k} = sum([(1 - f_{1+k}(county))**0.5 for county in counties split at least 2+k ways])
     max_splits = 0
-    # loop over counties 
-    for i, county_info in enumerate(partition.county_splits.values()):
+    # loop over counties
+    for county_info in partition.county_splits.values():
         splits = len(county_info.contains)
         max_splits = max(splits, max_splits)
         f_scores = get_f_scores(county_info, partition)
         # loop over number of county splits
-        for k in range(splits): 
-            # if a county is split k=4 ways, add 1 to county_split_counts 1, 2, 3, and 4 
+        for k in range(splits):
+            # if a county is split k=4 ways, add 1 to county_split_counts 1, 2, 3, and 4
             county_split_counts[k] += 1
-            # add county component to W_k score 
+            # add county component to W_k score
             w_scores[k] += (1 - f_scores[k])**0.5
 
     mc = 100    # TODO Change this!!!!!!!!
     # mc^k is the coefficient for the w_{2+k} score
-    # or use mc*k 
+    # or use mc*k
     j_c = 0.0   # County split score
     for k in range(max_splits):
         j_c += mc**k * county_split_counts[k] * w_scores[k]
@@ -125,7 +125,7 @@ def compute_county_split_score(partition):
 
 
 def vra_score(partition):
-    pass 
+    pass
 
 
 def score_function(partition):
@@ -140,19 +140,24 @@ def score_function(partition):
 
 
 def Q_func(partition1, partition2):
-    pass 
+    pass
 
 
 def acceptance_function(partition):
     score = score_function(partition)
-    # TODO 
-    # beta = 0 for first 10,000 accepted steps 
-    #   From 10,000 to 70,000, beta grows linearly to 1, only growing on accepted steps 
-    #   From 70,000 and up, beta = 1 
-    p = min(1, 
-        (Q_func(partition, partition.parent)/Q_func(partition.parent, partition)
-        *exp(-beta*(score_function(partition) - score_function(partition.parent)))))
-    return p  
+    # TODO
+    # beta = 0 for first 10,000 accepted steps
+    #   From 10,000 to 70,000, beta grows linearly to 1, only growing on accepted steps
+    #   From 70,000 and up, beta = 1
+    p = min(1,
+        Q_func(partition, partition.parent)
+        / Q_func(partition.parent, partition)
+        * exp(-beta * (
+            score_function(partition) - score_function(partition.parent)
+            )
+        )
+    )
+    return p
 
 
 def get_chain():
@@ -210,7 +215,7 @@ def get_chain():
             pop_constraint,
             compactness_bound
         ],
-        # accept=acceptance_function, #accept.always_accept,
+        # accept=acceptance_function,
         accept=accept.always_accept,
         initial_state=initial_partition,
         total_steps=5
