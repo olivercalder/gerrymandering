@@ -9,6 +9,8 @@ import random
 random.seed(1123)
 from math import exp
 
+partition_counter = 0 
+
 
 def compute_population_score(partition):
     '''
@@ -140,25 +142,46 @@ def score_function(partition):
 
 
 def Q_func(partition1, partition2):
-    pass
+    # cut edges are all the edges from one part of the partition to another 
+    conflicted = len(partition1.cut_edges)
+    part1 = partition1.cut_edges 
+    part2 = partition2.cut_edges 
+    # cross edges are edges that were cut in the 1st but are not in the 2nd 
+    cross = len(part2-part1)
+    return((1/2)*(cross/conflicted))
 
 
 def acceptance_function(partition):
-    score = score_function(partition)
-    # TODO
     # beta = 0 for first 10,000 accepted steps
     #   From 10,000 to 70,000, beta grows linearly to 1, only growing on accepted steps
     #   From 70,000 and up, beta = 1
+    global partition_counter
+    if partition_counter < 10000:
+        beta = 0
+    elif partition_counter < 70000:
+        beta = (partition_counter-10000)/60000
+    else: 
+        beta = 1
+
+    Q1 = Q_func(partition, partition.parent)
+    Q2 = Q_func(partition.parent, partition)
+    if Q2==0:
+        return False 
+
     p = min(1,
-        Q_func(partition, partition.parent)
-        / Q_func(partition.parent, partition)
-        * exp(-beta * (
+        (Q1 / Q2) * exp(-beta * (
             score_function(partition) - score_function(partition.parent)
             )
         )
     )
-    return p
 
+    # accept the partition with probability p 
+    accept = random.random()
+    if accept<p:
+        partition_counter+=1  
+        return True 
+    else: 
+        return False 
 
 def get_chain():
     """
@@ -166,7 +189,7 @@ def get_chain():
     :return: chain
     """
 
-    SHAPEFILE_PATH = "data/mn_mggg/MN16/mn_precincts16.shp"
+    SHAPEFILE_PATH = "../data/mn_mggg/MN16/mn_precincts16.shp"
     POPULATION_COL = "TOTPOP"
     ASSIGNMENT_COL = "CONGDIST"
 
@@ -208,6 +231,7 @@ def get_chain():
         2*len(initial_partition["cut_edges"])
     )
 
+    partition_counter = 0
 
     chain = MarkovChain(
         proposal=proposal,
@@ -215,10 +239,10 @@ def get_chain():
             pop_constraint,
             compactness_bound
         ],
-        # accept=acceptance_function,
-        accept=accept.always_accept,
+        accept=acceptance_function,
+        # accept=accept.always_accept,
         initial_state=initial_partition,
-        total_steps=5
+        total_steps=100
     )
 
     return chain
@@ -254,7 +278,10 @@ def display_chain_data(data):
 
 def explore_chain(chain):
     #print(partition.area)
-    print(partition)
+    for partition in chain:
+        print(type(partition.cut_edges))
+        print(partition.cut_edges)
+        print(partition.graph.edges)
     # print(partition.perimeter)
     # print(partition.population)
     # print(partition["SSEN16"].wins("Democratic"))
@@ -299,11 +326,11 @@ def out_csv(chain):
 if __name__ == "__main__":
     chain = get_chain()
     data = get_chain_data(chain)
-    #display_chain_data(data)
+    # display_chain_data(data)
 
-    explore_chain(chain)
+    # explore_chain(chain)
 
-    # out_csv(chain)
+    out_csv(chain)
 
 
 """
