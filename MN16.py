@@ -9,6 +9,8 @@ import random
 random.seed(1123)
 from math import exp
 
+# Districts with over 42.5% population of some minority are "winnable" by that minority group
+OPPORTUNITY_THRESHOLD = 0.425
 partition_counter = 0
 
 
@@ -126,28 +128,52 @@ def compute_county_split_score(partition):
     return j_c
 
 
-def vra_score(partition):
-    pass
+def compute_vra_score(partition):
+    black_weight = 1    # TODO Change these weights per state
+    hisp_weight = 1     # ex. for states with low hispanic population, could make hisp_weight = 0
+
+    # OPPORTUNITY_THRESHOLD is defined globally
+    statewide_vap = 0
+    statewide_bvap = 0
+    statewide_hvap = 0
+    total_districts = 0
+    black_opportunity_districts = 0
+    hisp_opportunity_districts = 0
+    for key in partition.vap:
+        statewide_vap += partition.vap[key]
+        statewide_bvap += partition.bvap[key]
+        statewide_hvap += partition.hvap[key]
+        total_districts += 1
+        if partition.bvap[key] / partition.vap[key] > OPPORTUNITY_THRESHOLD:
+            black_opportunity_districts += 1
+        if partition.hvap[key] / partition.vap[key] > OPPORTUNITY_THRESHOLD:
+            hisp_opportunity_districts += 1
+    desired_black_opportunity = statewide_bvap / statewide_vap
+    desired_hisp_opportunity = statewide_hvap / statewide_vap
+    actual_black_opportunity = black_opportunity_districts / total_districts
+    actual_hisp_opportunity = hisp_opportunity_districts / total_districts
+    return black_weight * (actual_black_opportunity - desired_black_opportunity) ** 2 \
+            + hisp_weight * (actual_hisp_opportunity - desired_hisp_opportunity) ** 2
 
 
 def score_function(partition):
     pop_score_weight = 1
     comp_score_weight = 1   # TODO Change these weights
     county_score_weight = 1
+    vra_score_weight = 1
     partition_score = 0.0
     partition_score += pop_score_weight * compute_population_score(partition)
     partition_score += comp_score_weight * compute_compactness_score(partition)
     partition_score += county_score_weight * compute_county_split_score(partition)
+    partition_score += vra_score_weight * compute_vra_score(partition)
     return partition_score
 
 
 def Q_func(partition1, partition2):
     # cut edges are all the edges from one part of the partition to another
     conflicted = len(partition1.cut_edges)
-    part1 = partition1.cut_edges
-    part2 = partition2.cut_edges
     # cross edges are edges that were cut in the 1st but are not in the 2nd
-    cross = len(part2-part1)
+    cross = len(partition1.cut_edges - partition2.cut_edges)
     return (cross / conflicted) / 2
 
 
@@ -289,16 +315,18 @@ def explore_chain(chain):
     # print(partition["SSEN16"].counts("Democratic"))
 
 
-
 def out_csv(chain):
     with open("MN_data.csv", "w", newline="") as csvfile:
         f = csv.writer(csvfile)
-        headings = ["State", "efficiency_gap", "partisan_bias", "d_seats", "r_seats"]
+        headings = ["State", "efficiency_gap", "partisan_bias", "d_seats", "r_seats", 'black_opportunity', 'hisp_opportunity']
         num_dists = 8
         # add vote count headings
         for i in range(num_dists):
-            headings.append("d_count_" + str(i))
-            headings.append("r_count_" + str(i))
+            headings.append(f'vap_{i}')
+            headings.append(f'bvap_{i}')
+            headings.append(f'hvap_{i}')
+            headings.append(f'd_count_{i}')
+            headings.append(f'r_count_{i}')
         f.writerow(headings)
 
         state = 1
@@ -309,19 +337,34 @@ def out_csv(chain):
             p_b = partition["SSEN16"].partisan_bias()
             dem = partition["SSEN16"].wins("Democratic")
             rep = partition["SSEN16"].wins("Republican")
-            row = [state, e_g, p_b, dem, rep]
+            b_opp_index = 5
+            h_opp_index = 6
+            row = [state, e_g, p_b, dem, rep, 0, 0]
 
             # get lists of vote counts and add to row
             dem_list = partition["SSEN16"].counts("Democratic")
             rep_list = partition["SSEN16"].counts("Republican")
             assert num_dists == len(dem_list)
+            black_opportunity_districts = 0
+            hisp_opportunity_districts = 0
             for i in range(num_dists):
+                vap_key = str(i + 1)    # TODO make sure these correspond to correct district numbers
+                vap = partition.vap[vap_key]
+                bvap = partition.bvap[vap_key]
+                hvap = partition.hvap[vap_key]
+                row.append(vap)
+                row.append(bvap)
+                row.append(hvap)
                 row.append(dem_list[i])
                 row.append(rep_list[i])
-
+                if bvap / vap > OPPORTUNITY_THRESHOLD:
+                    black_opportunity_districts += 1
+                if hvap / vap > OPPORTUNITY_THRESHOLD:
+                    hisp_opportunity_districts += 1
+            row[b_opp_index] = black_opportunity_districts
+            row[h_opp_index] = hisp_opportunity_districts
             f.writerow(row)
             state += 1
-
 
 
 if __name__ == "__main__":
