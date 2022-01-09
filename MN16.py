@@ -9,7 +9,7 @@ import random
 random.seed(1123)
 from math import exp
 
-partition_counter = 0 
+partition_counter = 0
 
 
 def compute_population_score(partition):
@@ -142,13 +142,13 @@ def score_function(partition):
 
 
 def Q_func(partition1, partition2):
-    # cut edges are all the edges from one part of the partition to another 
+    # cut edges are all the edges from one part of the partition to another
     conflicted = len(partition1.cut_edges)
-    part1 = partition1.cut_edges 
-    part2 = partition2.cut_edges 
-    # cross edges are edges that were cut in the 1st but are not in the 2nd 
+    part1 = partition1.cut_edges
+    part2 = partition2.cut_edges
+    # cross edges are edges that were cut in the 1st but are not in the 2nd
     cross = len(part2-part1)
-    return((1/2)*(cross/conflicted))
+    return (cross / conflicted) / 2
 
 
 def acceptance_function(partition):
@@ -159,29 +159,24 @@ def acceptance_function(partition):
     if partition_counter < 10000:
         beta = 0
     elif partition_counter < 70000:
-        beta = (partition_counter-10000)/60000
-    else: 
+        beta = (partition_counter - 10000) / 60000
+    else:
         beta = 1
 
-    Q1 = Q_func(partition, partition.parent)
     Q2 = Q_func(partition.parent, partition)
-    if Q2==0:
-        return False 
+    if Q2 == 0:
+        return False
+    Q1 = Q_func(partition, partition.parent)
 
-    p = min(1,
-        (Q1 / Q2) * exp(-beta * (
-            score_function(partition) - score_function(partition.parent)
-            )
-        )
-    )
+    p = min(1, (Q1 / Q2) * exp(-beta * (score_function(partition) - score_function(partition.parent))))
 
-    # accept the partition with probability p 
-    accept = random.random()
-    if accept<p:
-        partition_counter+=1  
-        return True 
-    else: 
-        return False 
+    # accept the partition with probability p
+    if random.random() < p:
+        partition_counter += 1
+        return True
+    else:
+        return False
+
 
 def get_chain():
     """
@@ -191,15 +186,21 @@ def get_chain():
 
     SHAPEFILE_PATH = "../data/mn_mggg/MN16/mn_precincts16.shp"
     POPULATION_COL = "TOTPOP"
+    VAP_COL = 'VAP'
+    BVAP_COL = 'BVAP'
+    HVAP_COL = 'HVAP'
     ASSIGNMENT_COL = "CONGDIST"
 
     graph = Graph.from_file(SHAPEFILE_PATH)
 
     # Make updaters
     all_updaters = {
-            "population": updaters.Tally(POPULATION_COL, alias="population"),
-            "county_splits": updaters.county_splits("county_splits", "COUNTYNAME"),
-            #"county_splits": updaters.CountySplit("county_splits", "COUNTYNAME"),  # TODO check on this one
+            'population': updaters.Tally(POPULATION_COL, alias='population'),
+            'vap': updaters.Tally(VAP_COL, alias='vap'),
+            'bvap': updaters.Tally(BVAP_COL, alias='bvap'),
+            'hvap': updaters.Tally(HVAP_COL, alias='hvap'),
+            'county_splits': updaters.county_splits('county_splits', 'COUNTYNAME'),
+            #"county_splits": updaters.CountySplit('county_splits', 'COUNTYNAME'),  # TODO check on this one
             }
 
     elections = [
