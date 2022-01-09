@@ -253,7 +253,8 @@ def display_chain_data(data):
 
 
 def explore_chain(chain):
-    print(partition.area)
+    #print(partition.area)
+    print(partition)
     # print(partition.perimeter)
     # print(partition.population)
     # print(partition["SSEN16"].wins("Democratic"))
@@ -298,9 +299,9 @@ def out_csv(chain):
 if __name__ == "__main__":
     chain = get_chain()
     data = get_chain_data(chain)
-    display_chain_data(data)
+    #display_chain_data(data)
 
-    # explore_chain(chain)
+    explore_chain(chain)
 
     # out_csv(chain)
 
