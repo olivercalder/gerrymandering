@@ -258,6 +258,7 @@ def get_chain():
         2*len(initial_partition["cut_edges"])
     )
 
+    global partition_counter
     partition_counter = 0
 
     chain = MarkovChain(
