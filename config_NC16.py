@@ -1,16 +1,18 @@
+# NOTE: see data readme about "No Representation Without Population Act" and ADJ_ variables
+
 # Shapefile info:
-SHAPEFILE_PATH = '../data/tx_mggg/TX_vtds/TX_vtds.shp'  # Path to shapefile
+SHAPEFILE_PATH = '../data/nc_mggg/NC_VTD.shp' # Path to shapefile
 POPULATION_COL = 'TOTPOP'       # Column where total population is stored
 VAP_COL = 'VAP'                 # Column where voting age population is stored
 BVAP_COL = 'BVAP'               # Column where black voting age population is stored
-HVAP_COL = 'HISPVAP'            # Column where hispanic voting age population is stored
-DISTRICT_COL = 'USCD'           # Column where district assignment is stored
-COUNTY_COL = 'COUNTY'           # Column where county is stored
-PAD_DISTRICT_NUMBERS = True     # Pad district numbers with leading 0s
+HVAP_COL = 'HVAP'               # Column where hispanic voting age population is stored
+DISTRICT_COL = 'CD'             # Column where district assignment is stored
+COUNTY_COL = 'County'           # Column where county is stored
+PAD_DISTRICT_NUMBERS = False    # Pad district numbers with leading 0s
 
 # Output info:
 TOTAL_STEPS = 100               # Total number of accepted maps to generate
-OUTPUT_PATH = 'TX_results.csv'  # File path for output CSV
+OUTPUT_PATH = 'NC_results.csv'  # File path for output CSV
 
 # Election info:
 ELECTION_NAME = 'PRES16'        # Name of the election used for partisan metrics
@@ -18,13 +20,13 @@ ELECTION_DEM_COL = 'PRES16D'    # Name of the column where democratic votes are 
 ELECTION_REP_COL = 'PRES16R'    # Name of the column where republican votes are stored
 
 # Districts:
-TOTAL_DISTRICTS = 36            # Total number of districts in the given shapefile
+TOTAL_DISTRICTS = 13            # Total number of districts in the given shapefile
 
 # VRA Compliance:
 OPPORTUNITY_THRESHOLD = 0.4     # Percent minority population to be considered "minority opportunity"
-BLACK_OPP_TARGET = 0.12*36      # Target number of black opportunity districts
+BLACK_OPP_TARGET = 0.22*13      # Target number of black opportunity districts
 BLACK_OPP_WEIGHT = 1            # The weight of black opportunity district VRA compliance
-HISPANIC_OPP_TARGET = 0.4*36    # Target number of hispanic opportunity districts
+HISPANIC_OPP_TARGET = 0.1*13    # Target number of hispanic opportunity districts
 HISPANIC_OPP_WEIGHT = 1         # The weight of hispanic opportunity district VRA compliance
 
 # County Split Scoring:
