@@ -1,3 +1,5 @@
+# NOTE: see data readme about "No Representation Without Population Act" and ADJ_ variables 
+
 import matplotlib.pyplot as plt
 from gerrychain import (GeographicPartition, Partition, Graph, MarkovChain,
                         proposals, updaters, constraints, accept, Election, metrics)
@@ -8,6 +10,8 @@ import csv
 import random
 random.seed(1123)
 from math import exp
+from networkx import is_connected, connected_components
+
 
 # Districts with over 42.5% population of some minority are "winnable" by that minority group
 OPPORTUNITY_THRESHOLD = 0.425
@@ -210,16 +214,24 @@ def get_chain():
     :return: chain
     """
 
-    SHAPEFILE_PATH = "../data/tx_mggg/TX_vtds/TX_vtds.shp" 
-    POPULATION_COL = "TOTPOP"
-    VAP_COL = 'VAP'
-    BVAP_COL = 'BVAP'
-    HVAP_COL = 'HISPVAP'
-    ASSIGNMENT_COL = "USCD" 
+    SHAPEFILE_PATH = "../data/md_mggg/MD-precincts.shp" 
+    POPULATION_COL = "ADJ_POP"
+    VAP_COL = 'ADJ_VAP'
+    BVAP_COL = 'ADJ_BVAP'
+    HVAP_COL = 'HVAP'
+    ASSIGNMENT_COL = "CD" 
     COUNTY_COL = 'COUNTY'
 
     # NOTE: there are a few errors in the shapefile (?); remove ignore_errors to see them 
     graph = Graph.from_file(SHAPEFILE_PATH, ignore_errors=True)
+    # MD: delete islands (see gerrychain docs)
+    components = list(connected_components(graph))
+    biggest_component_size = max(len(c) for c in components)
+    problem_components = [c for c in components if len(c) != biggest_component_size]
+    for component in problem_components:
+        for node in component:
+            print("Removed a node\n")
+            graph.remove_node(node)
 
     # Make updaters
     all_updaters = {
@@ -256,6 +268,8 @@ def get_chain():
         2*len(initial_partition["cut_edges"])
     )
 
+    partition_counter = 0
+
     chain = MarkovChain(
         proposal=proposal,
         constraints=[
@@ -265,7 +279,7 @@ def get_chain():
         accept=acceptance_function,
         # accept=accept.always_accept,
         initial_state=initial_partition,
-        total_steps=1000
+        total_steps=10
     )
 
     return chain
@@ -312,10 +326,11 @@ def explore_chain(chain):
 
 
 def out_csv(chain):
-    with open("TX_data.csv", "w", newline="") as csvfile:
+    num_dists = 8 # TODO 
+
+    with open("MD_data.csv", "w", newline="") as csvfile:
         f = csv.writer(csvfile)
         headings = ["State", "efficiency_gap", "partisan_bias", "d_seats", "r_seats", 'black_opportunity', 'hisp_opportunity']
-        num_dists = 36 # TODO
         # add vote count headings
         for i in range(num_dists):
             headings.append(f'vap_{i}')
@@ -345,11 +360,7 @@ def out_csv(chain):
             hisp_opportunity_districts = 0
             for i in range(num_dists):
                 vap_key = str(i + 1)    # TODO make sure these correspond to correct district numbers
-                # Thanks Texas partition...
-                if len(vap_key)==1:
-                    # keys are "01" "02" etc 
-                    vap_key = "0"+vap_key
-                vap = partition.vap[vap_key]
+                vap = partition.vap[vap_key] # ERROR
                 bvap = partition.bvap[vap_key]
                 hvap = partition.hvap[vap_key]
                 row.append(vap)

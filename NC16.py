@@ -210,13 +210,13 @@ def get_chain():
     :return: chain
     """
 
-    SHAPEFILE_PATH = "../data/tx_mggg/TX_vtds/TX_vtds.shp" 
+    SHAPEFILE_PATH = "../data/nc_mggg/NC_VTD.shp" 
     POPULATION_COL = "TOTPOP"
     VAP_COL = 'VAP'
     BVAP_COL = 'BVAP'
-    HVAP_COL = 'HISPVAP'
-    ASSIGNMENT_COL = "USCD" 
-    COUNTY_COL = 'COUNTY'
+    HVAP_COL = 'HVAP'
+    ASSIGNMENT_COL = "CD" 
+    COUNTY_COL = 'County'
 
     # NOTE: there are a few errors in the shapefile (?); remove ignore_errors to see them 
     graph = Graph.from_file(SHAPEFILE_PATH, ignore_errors=True)
@@ -231,7 +231,7 @@ def get_chain():
             }
 
     elections = [
-            Election('PRES16',  {'Democratic': 'PRES16D',   'Republican': 'PRES16R'}, alias='PRES16'),
+            Election('PRES16',  {'Democratic': 'EL16G_PR_D',   'Republican': 'EL16G_PR_R'}, alias='PRES16'),
             ]
 
     all_updaters.update({election.name: election for election in elections})
@@ -255,6 +255,8 @@ def get_chain():
         lambda p: len(p["cut_edges"]),
         2*len(initial_partition["cut_edges"])
     )
+
+    partition_counter = 0
 
     chain = MarkovChain(
         proposal=proposal,
@@ -312,10 +314,11 @@ def explore_chain(chain):
 
 
 def out_csv(chain):
-    with open("TX_data.csv", "w", newline="") as csvfile:
+    num_dists = 13 # TODO
+
+    with open("NC_data.csv", "w", newline="") as csvfile:
         f = csv.writer(csvfile)
         headings = ["State", "efficiency_gap", "partisan_bias", "d_seats", "r_seats", 'black_opportunity', 'hisp_opportunity']
-        num_dists = 36 # TODO
         # add vote count headings
         for i in range(num_dists):
             headings.append(f'vap_{i}')
@@ -345,11 +348,7 @@ def out_csv(chain):
             hisp_opportunity_districts = 0
             for i in range(num_dists):
                 vap_key = str(i + 1)    # TODO make sure these correspond to correct district numbers
-                # Thanks Texas partition...
-                if len(vap_key)==1:
-                    # keys are "01" "02" etc 
-                    vap_key = "0"+vap_key
-                vap = partition.vap[vap_key]
+                vap = partition.vap[vap_key] # ERROR
                 bvap = partition.bvap[vap_key]
                 hvap = partition.hvap[vap_key]
                 row.append(vap)
