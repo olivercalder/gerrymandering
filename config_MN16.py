@@ -1,37 +1,37 @@
 # Shapefile info:
-SHAPEFILE_PATH = '../data/mn_mggg/MN16/MN_precincts16.shp'  # Path to shapefile
-POPULATION_COL = 'TOTPOP'       # Column where total population is stored
-VAP_COL = 'VAP'                 # Column where voting age population is stored
-BVAP_COL = 'BVAP'               # Column where black voting age population is stored
-HVAP_COL = 'HVAP'               # Column where hispanic voting age population is stored
-DISTRICT_COL = 'CONGDIST'       # Column where district assignment is stored
-COUNTY_COL = 'COUNTYNAME'       # Column where county is stored
-PAD_DISTRICT_NUMBERS = False    # Pad district numbers with leading 0s
+shapefile_path: '../data/mn_mggg/MN16/mn_precincts16.shp'  # Path to shapefile
+population_col: 'TOTPOP'        # Column where total population is stored
+vap_col: 'VAP'                  # Column where voting age population is stored
+bvap_col: 'BVAP'                # Column where black voting age population is stored
+hvap_col: 'HVAP'                # Column where hispanic voting age population is stored
+district_col: 'CONGDIST'        # Column where district assignment is stored
+county_col: 'COUNTYNAME'        # Column where county is stored
+pad_district_numbers: False     # Pad district numbers with leading 0s
 
 # Output info:
-TOTAL_STEPS = 100               # Total number of accepted maps to generate
-OUTPUT_PATH = 'MN_results.csv'  # File path for output CSV
+total_steps: 100                # Total number of accepted maps to generate
+output_path: 'MN_results.csv'   # File path for output CSV
 
 # Election info:
-ELECTION_NAME = 'PRES16'        # Name of the election used for partisan metrics
-ELECTION_DEM_COL = 'PRES16D'    # Name of the column where democratic votes are stored
-ELECTION_REP_COL = 'PRES16R'    # Name of the column where republican votes are stored
+election_name: 'PRES16'         # Name of the election used for partisan metrics
+election_dem_col: 'PRES16D'     # Name of the column where democratic votes are stored
+election_rep_col: 'PRES16R'     # Name of the column where republican votes are stored
 
 # Districts:
-TOTAL_DISTRICTS = 8             # Total number of districts in the given shapefile
+total_districts: 8              # Total number of districts in the given shapefile
 
 # VRA Compliance:
-OPPORTUNITY_THRESHOLD = 0.3     # Percent minority population to be considered "minority opportunity"
-BLACK_OPP_TARGET = 2            # Target number of black opportunity districts
-BLACK_OPP_WEIGHT = 1            # The weight of black opportunity district VRA compliance
-HISPANIC_OPP_TARGET = 0         # Target number of hispanic opportunity districts
-HISPANIC_OPP_WEIGHT = 0         # The weight of hispanic opportunity district VRA compliance
+opportunity_threshold: 0.3      # Percent minority population to be considered "minority opportunity"
+black_opp_target: 2             # Target number of black opportunity districts
+black_opp_weight: 1             # The weight of black opportunity district VRA compliance
+hispanic_opp_target: 0          # Target number of hispanic opportunity districts
+hispanic_opp_weight: 0          # The weight of hispanic opportunity district VRA compliance
 
 # County Split Scoring:
-COUNTY_SPLIT_COEFFICIENT = 10   # (this)^k is the coefficient of the w_{2+k} score
+county_split_coefficient: 10    # (this)^k is the coefficient of the w_{2+k} score
 
 # Score function weights:
-POPULATION_SCORE_WEIGHT = 1     # Weight for population score
-COMPACTNESS_SCORE_WEIGHT = 1    # Weight for compactness score
-COUNTY_SCORE_WEIGHT = 1         # Weight for county split score
-VRA_SCORE_WEIGHT = 1            # Weight for VRA score
+population_score_weight: 1      # Weight for population score
+compactness_score_weight: 1     # Weight for compactness score
+county_score_weight: 1          # Weight for county split score
+vra_score_weight: 1             # Weight for VRA score

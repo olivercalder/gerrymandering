@@ -9,6 +9,20 @@ import random
 random.seed(1123)
 from math import exp
 from networkx import is_connected, connected_components
+import os
+import sys
+import yaml
+
+if len(sys.argv) != 2:
+    print('ERROR: missing config file', file=sys.stderr)
+    print(f'USAGE: python {sys.argv[0]} CONFIG_FILE', file=sys.stderr)
+    sys.exit(1)
+config_filename = sys.argv[1]
+if not os.path.exists(config_filename):
+    print(f'ERROR: config file does not exist: {config_filename}', file=sys.stderr)
+    sys.exit(2)
+with open(config_filename) as config_file:
+    config = yaml.safe_load(config_file)
 
 accepted_partition_counter = 0
 
@@ -118,12 +132,12 @@ def compute_county_split_score(partition):
             # add county component to W_k score
             w_scores[k] += (1 - f_scores[k])**0.5
 
-    # mc = COUNTY_SPLIT_COEFFICIENT
+    # mc = config['county_split_coefficient']
     # mc^k is the coefficient for the w_{2+k} score
     # or use mc*k
     j_c = 0.0   # County split score
     for k in range(max_splits):
-        j_c += COUNTY_SPLIT_COEFFICIENT**k * county_split_counts[k] * w_scores[k]
+        j_c += config['county_split_coefficient']**k * county_split_counts[k] * w_scores[k]
     return j_c
 
 
@@ -131,20 +145,20 @@ def compute_vra_score(partition):
     black_opportunity_districts = 0
     hisp_opportunity_districts = 0
     for key in partition.vap:
-        if partition.bvap[key] / partition.vap[key] > OPPORTUNITY_THRESHOLD:
+        if partition.bvap[key] / partition.vap[key] > config['opportunity_threshold']:
             black_opportunity_districts += 1
-        if partition.hvap[key] / partition.vap[key] > OPPORTUNITY_THRESHOLD:
+        if partition.hvap[key] / partition.vap[key] > config['opportunity_threshold']:
             hisp_opportunity_districts += 1
-    return BLACK_OPP_WEIGHT * (black_opportunity_districts - BLACK_OPP_TARGET) ** 2 \
-            + HISPANIC_OPP_WEIGHT * (hisp_opportunity_districts - HISPANIC_OPP_TARGET) ** 2
+    return config['black_opp_weight'] * (black_opportunity_districts - config['black_opp_target']) ** 2 \
+            + config['hispanic_opp_weight'] * (hisp_opportunity_districts - config['hispanic_opp_target']) ** 2
 
 
 def score_function(partition):
     partition_score = 0.0
-    partition_score += POPULATION_SCORE_WEIGHT * compute_population_score(partition)
-    partition_score += COMPACTNESS_SCORE_WEIGHT * compute_compactness_score(partition)
-    partition_score += COUNTY_SCORE_WEIGHT * compute_county_split_score(partition)
-    partition_score += VRA_SCORE_WEIGHT * compute_vra_score(partition)
+    partition_score += config['population_score_weight'] * compute_population_score(partition)
+    partition_score += config['compactness_score_weight'] * compute_compactness_score(partition)
+    partition_score += config['county_score_weight'] * compute_county_split_score(partition)
+    partition_score += config['vra_score_weight'] * compute_vra_score(partition)
     return partition_score
 
 
@@ -190,7 +204,7 @@ def get_chain():
     '''
 
     # NOTE: there are a few errors in some shapefiles; remove ignore_errors to see them
-    graph = Graph.from_file(SHAPEFILE_PATH, ignore_errors=True)
+    graph = Graph.from_file(config['shapefile_path'], ignore_errors=True)
 
     # delete islands (see gerrychain docs)
     components = list(connected_components(graph))
@@ -203,27 +217,27 @@ def get_chain():
 
     # Make updaters
     all_updaters = {
-            'population': updaters.Tally(POPULATION_COL, alias='population'),
-            'vap': updaters.Tally(VAP_COL, alias='vap'),
-            'bvap': updaters.Tally(BVAP_COL, alias='bvap'),
-            'hvap': updaters.Tally(HVAP_COL, alias='hvap'),
-            'county_splits': updaters.county_splits('county_splits', COUNTY_COL),
+            'population': updaters.Tally(config['population_col'], alias='population'),
+            'vap': updaters.Tally(config['vap_col'], alias='vap'),
+            'bvap': updaters.Tally(config['bvap_col'], alias='bvap'),
+            'hvap': updaters.Tally(config['hvap_col'], alias='hvap'),
+            'county_splits': updaters.county_splits('county_splits', config['county_col']),
             }
 
     elections = [
-            Election(ELECTION_NAME,  {'Democratic': ELECTION_DEM_COL,   'Republican': ELECTION_REP_COL}, alias=ELECTION_NAME),
+            Election(config['election_name'],  {'Democratic': config['election_dem_col'],   'Republican': config['election_rep_col']}, alias=config['election_name']),
             ]
 
     all_updaters.update({election.name: election for election in elections})
 
-    initial_partition = GeographicPartition(graph, assignment=DISTRICT_COL, updaters=all_updaters)
+    initial_partition = GeographicPartition(graph, assignment=config['district_col'], updaters=all_updaters)
 
     ideal_population = sum(initial_partition['population'].values()) / len(initial_partition)
 
     # We use functools.partial to bind the extra parameters (pop_col, pop_target, epsilon, node_repeats)
     # of the recom proposal.
     proposal = partial(recom,
-                    pop_col=POPULATION_COL,
+                    pop_col=config['population_col'],
                     pop_target=ideal_population,
                     epsilon=0.02,
                     node_repeats=2
@@ -248,7 +262,7 @@ def get_chain():
         accept=acceptance_function,
         # accept=accept.always_accept,
         initial_state=initial_partition,
-        total_steps=TOTAL_STEPS
+        total_steps=config['total_steps']
     )
 
     return chain
@@ -256,7 +270,7 @@ def get_chain():
 
 def get_chain_data(chain):
     return pandas.DataFrame(
-            sorted(partition[ELECTION_NAME].percents('Democratic'))
+            sorted(partition[config['election_name']].percents('Democratic'))
             for partition in chain.with_progress_bar())
 
 
@@ -295,11 +309,11 @@ def explore_chain(chain):
 
 
 def out_csv(chain):
-    with open(OUTPUT_PATH, 'w', newline='') as csvfile:
+    with open(config['output_path'], 'w', newline='') as csvfile:
         f = csv.writer(csvfile)
         headings = ['State', 'efficiency_gap', 'partisan_bias', 'd_seats', 'r_seats', 'black_opportunity', 'hisp_opportunity']
         # add vote count headings
-        for i in range(TOTAL_DISTRICTS):
+        for i in range(config['total_districts']):
             headings.append(f'vap_{i}')
             headings.append(f'bvap_{i}')
             headings.append(f'hvap_{i}')
@@ -311,24 +325,24 @@ def out_csv(chain):
         for partition in chain:
 
             # get election metrics, seats won and add to row
-            e_g = partition[ELECTION_NAME].efficiency_gap()
-            p_b = partition[ELECTION_NAME].partisan_bias()
-            dem = partition[ELECTION_NAME].wins('Democratic')
-            rep = partition[ELECTION_NAME].wins('Republican')
+            e_g = partition[config['election_name']].efficiency_gap()
+            p_b = partition[config['election_name']].partisan_bias()
+            dem = partition[config['election_name']].wins('Democratic')
+            rep = partition[config['election_name']].wins('Republican')
             b_opp_index = 5
             h_opp_index = 6
             row = [state, e_g, p_b, dem, rep, 0, 0]
 
             # get lists of vote counts and add to row
-            dem_list = partition[ELECTION_NAME].counts('Democratic')
-            rep_list = partition[ELECTION_NAME].counts('Republican')
-            assert TOTAL_DISTRICTS == len(dem_list)
+            dem_list = partition[config['election_name']].counts('Democratic')
+            rep_list = partition[config['election_name']].counts('Republican')
+            assert config['total_districts'] == len(dem_list)
             black_opportunity_districts = 0
             hisp_opportunity_districts = 0
-            for i in range(TOTAL_DISTRICTS):
+            for i in range(config['total_districts']):
                 vap_key = str(i + 1)            # TODO make sure these correspond to correct district numbers
-                if PAD_DISTRICT_NUMBERS:
-                    vap_key = (len(str(TOTAL_DISTRICTS)) - len(vap_key)) * '0' + vap_key
+                if config['pad_district_numbers']:
+                    vap_key = (len(str(config['total_districts'])) - len(vap_key)) * '0' + vap_key
                 vap = partition.vap[vap_key]
                 bvap = partition.bvap[vap_key]
                 hvap = partition.hvap[vap_key]
@@ -337,9 +351,9 @@ def out_csv(chain):
                 row.append(hvap)
                 row.append(dem_list[i])
                 row.append(rep_list[i])
-                if bvap / vap > OPPORTUNITY_THRESHOLD:
+                if bvap / vap > config['opportunity_threshold']:
                     black_opportunity_districts += 1
-                if hvap / vap > OPPORTUNITY_THRESHOLD:
+                if hvap / vap > config['opportunity_threshold']:
                     hisp_opportunity_districts += 1
             row[b_opp_index] = black_opportunity_districts
             row[h_opp_index] = hisp_opportunity_districts
