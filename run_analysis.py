@@ -12,17 +12,8 @@ from networkx import is_connected, connected_components
 import os
 import sys
 import yaml
+import time
 
-if len(sys.argv) != 2:
-    print('ERROR: missing config file', file=sys.stderr)
-    print(f'USAGE: python {sys.argv[0]} CONFIG_FILE', file=sys.stderr)
-    sys.exit(1)
-config_filename = sys.argv[1]
-if not os.path.exists(config_filename):
-    print(f'ERROR: config file does not exist: {config_filename}', file=sys.stderr)
-    sys.exit(2)
-with open(config_filename) as config_file:
-    config = yaml.safe_load(config_file)
 
 accepted_partition_counter = 0
 
@@ -322,7 +313,7 @@ def out_csv(chain):
         f.writerow(headings)
 
         state = 1
-        for partition in chain:
+        for partition in chain.with_progress_bar():
 
             # get election metrics, seats won and add to row
             e_g = partition[config['election_name']].efficiency_gap()
@@ -362,13 +353,35 @@ def out_csv(chain):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print('ERROR: missing config file', file=sys.stderr)
+        print(f'USAGE: python {sys.argv[0]} CONFIG_FILE', file=sys.stderr)
+        sys.exit(1)
+    config_filename = sys.argv[1]
+    if not os.path.exists(config_filename):
+        print(f'ERROR: config file does not exist: {config_filename}', file=sys.stderr)
+        sys.exit(2)
+    with open(config_filename) as config_file:
+        config = yaml.safe_load(config_file)
+    print('Initializing chain...')
+    start = time.time()
     chain = get_chain()
-    data = get_chain_data(chain)
-    # display_chain_data(data)
+    end = time.time()
+    print(f'Finished initializing chain in {end - start} seconds.')
+    #print('Evaluating chain...')
+    #start = time.time()
+    #data = get_chain_data(chain)
+    #end = time.time()
+    #print(f'Finished evaulating chain in {end - start} seconds.')
 
+    # display_chain_data(data)
     # explore_chain(chain)
 
+    print(f'Writing results as csv to {config["output_path"]}...')
+    start = time.time()
     out_csv(chain)
+    end = time.time()
+    print(f'Finished outputting results in {end - start} seconds.')
 
 
 '''
