@@ -1,5 +1,5 @@
 # Shapefile info:
-shapefile_path: 'data/ma_mggg/MA_no_islands_12_16/MA_precincts_12_16.shp' # Path to shapefile
+shapefile_path: 'data/ma_mggg/MA_precincts_12_16/MA_precincts_12_16.shp' # Path to shapefile
 population_col: 'TOTPOP'        # Column where total population is stored
 vap_col: 'VAP'                  # Column where voting age population is stored
 bvap_col: 'BVAP'                # Column where black voting age population is stored

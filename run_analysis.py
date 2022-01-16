@@ -327,8 +327,8 @@ def out_csv(chain):
                     0,  # Will change later by setting row[b_opp_index]
                     0,  # Will change later by setting row[h_opp_index]
                     ]
-            b_opp_index = len(row - 2)
-            h_opp_index = len(row - 1)
+            b_opp_index = len(row) - 2
+            h_opp_index = len(row) - 1
 
             # get lists of vote counts and add to row
             dem_list = partition[config['election_name']].counts('Democratic')

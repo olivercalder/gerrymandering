@@ -1,7 +1,7 @@
 # NOTE: see data readme about "No Representation Without Population Act" and ADJ_ variables
 
 # Shapefile info:
-shapefile_path: 'data/md_mggg/MD_precincts_abs/MD-precincts.shp'  # Path to shapefile
+shapefile_path: 'data/md_mggg/MD_precincts_abs/MD-precincts_abs.shp'  # Path to shapefile
 population_col: 'ADJ_POP'       # Column where total population is stored
 vap_col: 'ADJ_VAP'              # Column where voting age population is stored
 bvap_col: 'ADJ_BVAP'            # Column where black voting age population is stored
