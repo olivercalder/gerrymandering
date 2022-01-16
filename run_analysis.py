@@ -302,7 +302,7 @@ def explore_chain(chain):
 def out_csv(chain):
     with open(config['output_path'], 'w', newline='') as csvfile:
         f = csv.writer(csvfile)
-        headings = ['State', 'efficiency_gap', 'partisan_bias', 'd_seats', 'r_seats', 'black_opportunity', 'hisp_opportunity']
+        headings = ['State', 'efficiency_gap', 'partisan_bias', 'mean_median', 'partisan_gini', 'd_seats', 'r_seats', 'black_opportunity', 'hisp_opportunity']
         # add vote count headings
         for i in range(config['total_districts']):
             headings.append(f'vap_{i}')
@@ -316,13 +316,19 @@ def out_csv(chain):
         for partition in chain.with_progress_bar():
 
             # get election metrics, seats won and add to row
-            e_g = partition[config['election_name']].efficiency_gap()
-            p_b = partition[config['election_name']].partisan_bias()
-            dem = partition[config['election_name']].wins('Democratic')
-            rep = partition[config['election_name']].wins('Republican')
-            b_opp_index = 5
-            h_opp_index = 6
-            row = [state, e_g, p_b, dem, rep, 0, 0]
+            row = [
+                    state,
+                    partition[config['election_name']].efficiency_gap()
+                    partition[config['election_name']].partisan_bias()
+                    partition[config['election_name']].mean_median()
+                    partition[config['election_name']].partisan_gini()
+                    partition[config['election_name']].wins('Democratic')
+                    partition[config['election_name']].wins('Republican')
+                    0   # Will change later by setting row[b_opp_index]
+                    0   # Will change later by setting row[h_opp_index]
+                    ]
+            b_opp_index = len(row - 2)
+            h_opp_index = len(row - 1)
 
             # get lists of vote counts and add to row
             dem_list = partition[config['election_name']].counts('Democratic')
@@ -331,7 +337,7 @@ def out_csv(chain):
             black_opportunity_districts = 0
             hisp_opportunity_districts = 0
             for i in range(config['total_districts']):
-                vap_key = str(i + 1)            # TODO make sure these correspond to correct district numbers
+                vap_key = str(i + 1)
                 if config['pad_district_numbers']:
                     vap_key = (len(str(config['total_districts'])) - len(vap_key)) * '0' + vap_key
                 vap = partition.vap[vap_key]
