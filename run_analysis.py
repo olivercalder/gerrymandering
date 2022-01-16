@@ -318,14 +318,14 @@ def out_csv(chain):
             # get election metrics, seats won and add to row
             row = [
                     state,
-                    partition[config['election_name']].efficiency_gap()
-                    partition[config['election_name']].partisan_bias()
-                    partition[config['election_name']].mean_median()
-                    partition[config['election_name']].partisan_gini()
-                    partition[config['election_name']].wins('Democratic')
-                    partition[config['election_name']].wins('Republican')
-                    0   # Will change later by setting row[b_opp_index]
-                    0   # Will change later by setting row[h_opp_index]
+                    partition[config['election_name']].efficiency_gap(),
+                    partition[config['election_name']].partisan_bias(),
+                    partition[config['election_name']].mean_median(),
+                    partition[config['election_name']].partisan_gini(),
+                    partition[config['election_name']].wins('Democratic'),
+                    partition[config['election_name']].wins('Republican'),
+                    0,  # Will change later by setting row[b_opp_index]
+                    0,  # Will change later by setting row[h_opp_index]
                     ]
             b_opp_index = len(row - 2)
             h_opp_index = len(row - 1)
