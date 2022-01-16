@@ -14,8 +14,8 @@ output_path: 'NC_results.csv'   # File path for output CSV
 
 # Election info:
 election_name: 'PRES16'         # Name of the election used for partisan metrics
-election_dem_col: 'PRES16D'     # Name of the column where democratic votes are stored
-election_rep_col: 'PRES16R'     # Name of the column where republican votes are stored
+election_dem_col: 'EL16G_PR_D'  # Name of the column where democratic votes are stored
+election_rep_col: 'EL16G_PR_R'  # Name of the column where republican votes are stored
 
 # Districts:
 total_districts: 13             # Total number of districts in the given shapefile
