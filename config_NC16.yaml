@@ -1,5 +1,5 @@
 # Shapefile info:
-shapefile_path: '../data/nc_mggg/NC_VTD.shp' # Path to shapefile
+shapefile_path: 'data/nc_mggg/iNC_VTX/NC_VTD.shp' # Path to shapefile
 population_col: 'TOTPOP'        # Column where total population is stored
 vap_col: 'VAP'                  # Column where voting age population is stored
 bvap_col: 'BVAP'                # Column where black voting age population is stored
@@ -22,9 +22,9 @@ total_districts: 13             # Total number of districts in the given shapefi
 
 # VRA Compliance:
 opportunity_threshold: 0.4      # Percent minority population to be considered "minority opportunity"
-black_opp_target: 0.22*13       # Target number of black opportunity districts
+black_opp_target: 3             # Target number of black opportunity districts
 black_opp_weight: 1             # The weight of black opportunity district VRA compliance
-hispanic_opp_target: 0.1*13     # Target number of hispanic opportunity districts
+hispanic_opp_target: 1          # Target number of hispanic opportunity districts
 hispanic_opp_weight: 1          # The weight of hispanic opportunity district VRA compliance
 
 # County Split Scoring:
