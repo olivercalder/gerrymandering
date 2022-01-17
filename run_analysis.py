@@ -378,9 +378,9 @@ def out_csv(chain):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print('ERROR: missing config file', file=sys.stderr)
-        print(f'USAGE: python {sys.argv[0]} CONFIG_FILE', file=sys.stderr)
+        print(f'USAGE: python {sys.argv[0]} CONFIG_FILE [OUTPUT_FILE]', file=sys.stderr)
         sys.exit(1)
     config_filename = sys.argv[1]
     if not os.path.exists(config_filename):
@@ -388,6 +388,8 @@ if __name__ == '__main__':
         sys.exit(2)
     with open(config_filename) as config_file:
         config = yaml.safe_load(config_file)
+    if len(sys.argv) > 2:
+        config['output_path'] = sys.argv[2]
     print('Initializing chain...')
     start = time.time()
     chain = get_chain()
