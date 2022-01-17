@@ -6,7 +6,7 @@ from functools import partial
 import pandas
 import csv
 import random
-random.seed(1123)
+#random.seed(1123)  # we want a variety of results, don't provide a seed
 import math
 from networkx import is_connected, connected_components
 import os
