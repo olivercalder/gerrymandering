@@ -7,7 +7,7 @@ import pandas
 import csv
 import random
 random.seed(1123)
-from math import exp
+import math
 from networkx import is_connected, connected_components
 import os
 import sys
@@ -178,7 +178,16 @@ def acceptance_function(partition):
         return False
     Q1 = Q_func(partition, partition.parent)
 
-    p = min(1, (Q1 / Q2) * exp(-beta * (score_function(partition) - score_function(partition.parent))))
+    # Run into a math range error if this is computed directly without checks:
+    # p = min(1, (Q1 / Q2) * exp(-beta * (score_function(partition) - score_function(partition.parent))))
+
+    # Instead, pre-compute the exponent, then evaluate it iff the exponent is less than 0
+    exponent = -beta * (score_function(partition) - score_function(partition.parent)) + math.log(Q1 / Q2)
+    if exponent >= 0:
+        accepted_partition_counter += 1
+        return True
+
+    p = min(1, math.exp(exponent))
 
     # accept the partition with probability p
     if random.random() < p:
@@ -302,7 +311,7 @@ def explore_chain(chain):
 def out_csv(chain):
     with open(config['output_path'], 'w', newline='') as csvfile:
         f = csv.writer(csvfile)
-        headings = ['State', 'efficiency_gap', 'partisan_bias', 'mean_median', 'partisan_gini', 'd_seats', 'r_seats', 'black_opportunity', 'hisp_opportunity']
+        headings = ['State', 'efficiency_gap', 'partisan_bias', 'mean_median', 'partisan_gini', 'd_seats', 'r_seats', 'total_score', 'population_score', 'compactness_score', 'county_score', 'vra_score', 'black_opportunity', 'hisp_opportunity']
         # add vote count headings
         for i in range(config['total_districts']):
             headings.append(f'vap_{i}')
@@ -314,8 +323,13 @@ def out_csv(chain):
 
         state = 1
         for partition in chain.with_progress_bar():
+            population_score = config['population_score_weight'] * compute_population_score(partition)
+            compactness_score = config['compactness_score_weight'] * compute_compactness_score(partition)
+            county_split_score = config['county_score_weight'] * compute_county_split_score(partition)
+            vra_score = config['vra_score_weight'] * compute_vra_score(partition)
+            total_score = population_score + compactness_score + county_split_score + vra_score
 
-            # get election metrics, seats won and add to row
+            # get election metrics, seats won, and scores and add to row
             row = [
                     state,
                     partition[config['election_name']].efficiency_gap(),
@@ -324,6 +338,11 @@ def out_csv(chain):
                     partition[config['election_name']].partisan_gini(),
                     partition[config['election_name']].wins('Democratic'),
                     partition[config['election_name']].wins('Republican'),
+                    total_score,
+                    population_score,
+                    compactness_score,
+                    county_split_score,
+                    vra_score,
                     0,  # Will change later by setting row[b_opp_index]
                     0,  # Will change later by setting row[h_opp_index]
                     ]
