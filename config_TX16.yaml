@@ -9,8 +9,8 @@ county_col: 'COUNTY'            # Column where county is stored
 pad_district_numbers: True      # Pad district numbers with leading 0s
 
 # Output info:
-total_steps: 100                # Total number of accepted maps to generate
-output_path: 'TX_results.csv'   # File path for output CSV
+total_steps: 100000             # Total number of accepted maps to generate
+output_path: 'results_TX.csv'   # File path for output CSV
 
 # Election info:
 election_name: 'PRES16'         # Name of the election used for partisan metrics
