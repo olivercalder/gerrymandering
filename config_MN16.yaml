@@ -10,7 +10,7 @@ pad_district_numbers: False     # Pad district numbers with leading 0s
 
 # Output info:
 total_steps: 100                # Total number of accepted maps to generate
-output_path: 'MN_results.csv'   # File path for output CSV
+output_path: 'results_MN.csv'   # File path for output CSV
 
 # Election info:
 election_name: 'PRES16'         # Name of the election used for partisan metrics
