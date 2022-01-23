@@ -225,7 +225,9 @@ def get_chain():
             }
 
     elections = [
-            Election(config['election_name'],  {'Democratic': config['election_dem_col'],   'Republican': config['election_rep_col']}, alias=config['election_name']),
+            Election(election_name,  {'Democratic': config['elections'][election_name]['dem_col'],
+                'Republican': config['elections'][election_name]['rep_col']
+                }, alias=election_name) for election_name in config['elections']
             ]
 
     all_updaters.update({election.name: election for election in elections})
@@ -311,7 +313,15 @@ def explore_chain(chain):
 def out_csv(chain):
     with open(config['output_path'], 'w', newline='') as csvfile:
         f = csv.writer(csvfile)
-        headings = ['State', 'efficiency_gap', 'partisan_bias', 'mean_median', 'partisan_gini', 'd_seats', 'r_seats', 'total_score', 'population_score', 'compactness_score', 'county_score', 'vra_score', 'black_opportunity', 'hisp_opportunity']
+        headings = ['State', 'avg_efficiency_gap', 'avg_partisan_bias', 'avg_mean_median', 'avg_partisan_gini', 'avg_d_seats', 'avg_r_seats']
+        for election_name in config['elections']:
+            headings.append(election_name + '_efficiency_gap')
+            headings.append(election_name + '_partisan_bias')
+            headings.append(election_name + '_mean_median')
+            headings.append(election_name + '_partisan_gini')
+            headings.append(election_name + '_d_seats')
+            headings.append(election_name + '_r_seats')
+        headings += ['total_score', 'population_score', 'compactness_score', 'county_score', 'vra_score', 'black_opportunity', 'hisp_opportunity']
         # add vote count headings
         for i in range(config['total_districts']):
             headings.append(f'vap_{i}')
@@ -330,14 +340,41 @@ def out_csv(chain):
             total_score = population_score + compactness_score + county_split_score + vra_score
 
             # get election metrics, seats won, and scores and add to row
-            row = [
-                    state,
-                    partition[config['election_name']].efficiency_gap(),
-                    partition[config['election_name']].partisan_bias(),
-                    partition[config['election_name']].mean_median(),
-                    partition[config['election_name']].partisan_gini(),
-                    partition[config['election_name']].wins('Democratic'),
-                    partition[config['election_name']].wins('Republican'),
+            sum_eff_gap = 0.0
+            sum_part_bias = 0.0
+            sum_mean_med = 0.0
+            sum_part_gini = 0.0
+            sum_d_seats = 0
+            sum_r_seats = 0
+            row = []
+            for election_name in config['elections']:
+                eff_gap = partition[election_name].efficiency_gap()
+                part_bias = partition[election_name].partisan_bias()
+                mean_med = partition[election_name].mean_median()
+                part_gini = partition[election_name].partisan_gini()
+                d_seats = partition[election_name].wins('Democratic')
+                r_seats = partition[election_name].wins('Republican')
+                sum_eff_gap += eff_gap
+                sum_part_bias += part_bias
+                sum_mean_med += mean_med
+                sum_part_gini += part_gini
+                sum_d_seats += d_seats
+                sum_r_seats += r_seats
+                row.append(eff_gap)
+                row.append(part_bias)
+                row.append(mean_med)
+                row.append(part_gini)
+                row.append(d_seats)
+                row.append(r_seats)
+            row = [state] + [
+                    sum_eff_gap / len(config['elections'])
+                    sum_part_bias / len(config['elections'])
+                    sum_mean_med / len(config['elections'])
+                    sum_part_gini / len(config['elections'])
+                    sum_d_seats / len(config['elections'])
+                    sum_r_seats / len(config['elections'])
+                    ] + row
+            row += [
                     total_score,
                     population_score,
                     compactness_score,

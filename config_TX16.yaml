@@ -13,9 +13,22 @@ total_steps: 100000             # Total number of accepted maps to generate
 output_path: 'results_TX.csv'   # File path for output CSV
 
 # Election info:
-election_name: 'PRES16'         # Name of the election used for partisan metrics
-election_dem_col: 'PRES16D'     # Name of the column where democratic votes are stored
-election_rep_col: 'PRES16R'     # Name of the column where republican votes are stored
+elections:
+  'PRES12':
+    dem_col: 'PRES12D'
+    rep_col: 'PRES12R'
+  'SEN12':
+    dem_col: 'SEN12D'
+    rep_col: 'SEN12R'
+  'SEN14':
+    dem_col: 'SEN14D'
+    rep_col: 'SEN14R'
+  'GOV14':
+    dem_col: 'GOV14D'
+    rep_col: 'GOV14R'
+  'PRES16':                     # Name of the election used for partisan metrics
+    dem_col: 'PRES16D'          # Name of the column where democratic votes are stored
+    rep_col: 'PRES16R'          # Name of the column where republican votes are stored
 
 # Districts:
 total_districts: 36             # Total number of districts in the given shapefile
