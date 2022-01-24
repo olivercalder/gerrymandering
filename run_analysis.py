@@ -327,8 +327,9 @@ def out_csv(chain):
             headings.append(f'vap_{i}')
             headings.append(f'bvap_{i}')
             headings.append(f'hvap_{i}')
-            headings.append(f'd_count_{i}')
-            headings.append(f'r_count_{i}')
+            for election_name in config['elections']:
+                headings.append(f'{election_name}_d_count_{i}')
+                headings.append(f'{election_name}_r_count_{i}')
         f.writerow(headings)
 
         state = 1
@@ -367,12 +368,12 @@ def out_csv(chain):
                 row.append(d_seats)
                 row.append(r_seats)
             row = [state] + [
-                    sum_eff_gap / len(config['elections'])
-                    sum_part_bias / len(config['elections'])
-                    sum_mean_med / len(config['elections'])
-                    sum_part_gini / len(config['elections'])
-                    sum_d_seats / len(config['elections'])
-                    sum_r_seats / len(config['elections'])
+                    sum_eff_gap / len(config['elections']),
+                    sum_part_bias / len(config['elections']),
+                    sum_mean_med / len(config['elections']),
+                    sum_part_gini / len(config['elections']),
+                    sum_d_seats / len(config['elections']),
+                    sum_r_seats / len(config['elections']),
                     ] + row
             row += [
                     total_score,
@@ -387,9 +388,11 @@ def out_csv(chain):
             h_opp_index = len(row) - 1
 
             # get lists of vote counts and add to row
-            dem_list = partition[config['election_name']].counts('Democratic')
-            rep_list = partition[config['election_name']].counts('Republican')
-            assert config['total_districts'] == len(dem_list)
+            election_votes_lists_dem = {}
+            election_votes_lists_rep = {}
+            for election_name in config['elections']:
+                election_votes_lists_dem[election_name] = partition[election_name].counts('Democratic')
+                election_votes_lists_rep[election_name] = partition[election_name].counts('Republican')
             black_opportunity_districts = 0
             hisp_opportunity_districts = 0
             for i in range(config['total_districts']):
@@ -402,8 +405,9 @@ def out_csv(chain):
                 row.append(vap)
                 row.append(bvap)
                 row.append(hvap)
-                row.append(dem_list[i])
-                row.append(rep_list[i])
+                for election_name in config['elections']:
+                    row.append(election_votes_lists_dem[election_name][i])
+                    row.append(election_votes_lists_rep[election_name][i])
                 if bvap / vap > config['opportunity_threshold']:
                     black_opportunity_districts += 1
                 if hvap / vap > config['opportunity_threshold']:
