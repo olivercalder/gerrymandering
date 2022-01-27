@@ -183,6 +183,8 @@ def acceptance_function(partition):
 
     # Instead, pre-compute the exponent, then evaluate it iff the exponent is less than 0
     exponent = -beta * (score_function(partition) - score_function(partition.parent)) + math.log(Q1 / Q2)
+    # What if instead we scaled score function output by one of the scores?
+    # exponent = -beta * ((score_function(partition) - score_function(partition.parent)) / score_function(partition.parent)) + math.log(Q1 / Q2)
     if exponent >= 0:
         accepted_partition_counter += 1
         return True
