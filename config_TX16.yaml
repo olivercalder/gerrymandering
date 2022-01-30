@@ -47,4 +47,4 @@ county_split_coefficient: 10    # (this)^k is the coefficient of the w_{2+k} sco
 population_score_weight: 1321   # Weight for population score
 compactness_score_weight: 0.0515 # Weight for compactness score
 county_score_weight: 0.00063345 # Weight for county split score
-opportunity_score_weight: 3.617 # Weight for VRA score
+opportunity_score_weight: 0     # Weight for opportunity score
