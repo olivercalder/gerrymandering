@@ -182,7 +182,9 @@ def acceptance_function(partition):
     # p = min(1, (Q1 / Q2) * exp(-beta * (score_function(partition) - score_function(partition.parent))))
 
     # Instead, pre-compute the exponent, then evaluate it iff the exponent is less than 0
-    exponent = -beta * (score_function(partition) - score_function(partition.parent)) + math.log(Q1 / Q2)
+    new_score = score_function(partition)
+    parent_score = score_function(partition.parent)
+    exponent = -beta * (new_score - parent_score) / (parent_score if config['normalize_scores'] else 1) + math.log(Q1 / Q2)
     # What if instead we scaled score function output by one of the scores?
     # exponent = -beta * ((score_function(partition) - score_function(partition.parent)) / score_function(partition.parent)) + math.log(Q1 / Q2)
     if exponent >= 0:

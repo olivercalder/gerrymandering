@@ -41,10 +41,13 @@ hispanic_opp_target: 0          # Target number of hispanic opportunity district
 hispanic_opp_weight: 0          # The weight of hispanic opportunity district scoring
 
 # County Split Scoring:
-county_split_coefficient: 10    # (this)^k is the coefficient of the w_{2+k} score
+county_split_coefficient: 2     # (this)^k is the coefficient of the w_{2+k} score
 
 # Score function weights:
 population_score_weight: 2171   # Weight for population score
 compactness_score_weight: 0.1165 # Weight for compactness score
 county_score_weight: 0.06664    # Weight for county split score
 opportunity_score_weight: 0     # Weight for opportunity score
+
+# Normalize scores by dividing (J(E') - J(E)) by J(E)
+normalize_scores: False
