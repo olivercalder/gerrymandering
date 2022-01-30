@@ -132,7 +132,7 @@ def compute_county_split_score(partition):
     return j_c
 
 
-def compute_vra_score(partition):
+def compute_opportunity_score(partition):
     black_opportunity_districts = 0
     hisp_opportunity_districts = 0
     for key in partition.vap:
@@ -149,7 +149,7 @@ def score_function(partition):
     partition_score += config['population_score_weight'] * compute_population_score(partition)
     partition_score += config['compactness_score_weight'] * compute_compactness_score(partition)
     partition_score += config['county_score_weight'] * compute_county_split_score(partition)
-    partition_score += config['vra_score_weight'] * compute_vra_score(partition)
+    partition_score += config['opportunity_score_weight'] * compute_opportunity_score(partition)
     return partition_score
 
 
@@ -323,15 +323,15 @@ def out_csv(chain):
             headings.append(election_name + '_partisan_gini')
             headings.append(election_name + '_d_seats')
             headings.append(election_name + '_r_seats')
-        headings += ['total_score', 'population_score', 'compactness_score', 'county_score', 'vra_score', 'black_opportunity', 'hisp_opportunity']
+        headings += ['total_score', 'population_score', 'compactness_score', 'county_score', 'opportunity_score', 'black_opportunity_districts', 'hisp_opportunity_districts']
         # add vote count headings
         for i in range(config['total_districts']):
-            headings.append(f'vap_{i}')
-            headings.append(f'bvap_{i}')
-            headings.append(f'hvap_{i}')
+            headings.append(f'vap_{i+1:02}')
+            headings.append(f'bvap_{i+1:02}')
+            headings.append(f'hvap_{i+1:02}')
             for election_name in config['elections']:
-                headings.append(f'{election_name}_d_count_{i}')
-                headings.append(f'{election_name}_r_count_{i}')
+                headings.append(f'{election_name}_d_count_{i+1:02}')
+                headings.append(f'{election_name}_r_count_{i+1:02}')
         f.writerow(headings)
 
         state = 1
@@ -339,8 +339,8 @@ def out_csv(chain):
             population_score = config['population_score_weight'] * compute_population_score(partition)
             compactness_score = config['compactness_score_weight'] * compute_compactness_score(partition)
             county_split_score = config['county_score_weight'] * compute_county_split_score(partition)
-            vra_score = config['vra_score_weight'] * compute_vra_score(partition)
-            total_score = population_score + compactness_score + county_split_score + vra_score
+            opportunity_score = config['opportunity_score_weight'] * compute_opportunity_score(partition)
+            total_score = population_score + compactness_score + county_split_score + opportunity_score
 
             # get election metrics, seats won, and scores and add to row
             sum_eff_gap = 0.0
@@ -382,7 +382,7 @@ def out_csv(chain):
                     population_score,
                     compactness_score,
                     county_split_score,
-                    vra_score,
+                    opportunity_score,
                     0,  # Will change later by setting row[b_opp_index]
                     0,  # Will change later by setting row[h_opp_index]
                     ]

@@ -72,12 +72,12 @@ elections:
 # Districts:
 total_districts: 8              # Total number of districts in the given shapefile
 
-# VRA Compliance:
+# Opportunity Scoring:
 opportunity_threshold: 0.3      # Percent minority population to be considered "minority opportunity"
 black_opp_target: 2             # Target number of black opportunity districts
-black_opp_weight: 1             # The weight of black opportunity district VRA compliance
+black_opp_weight: 1             # The weight of black opportunity district scoring
 hispanic_opp_target: 0          # Target number of hispanic opportunity districts
-hispanic_opp_weight: 0          # The weight of hispanic opportunity district VRA compliance
+hispanic_opp_weight: 0          # The weight of hispanic opportunity district scoring
 
 # County Split Scoring:
 county_split_coefficient: 10    # (this)^k is the coefficient of the w_{2+k} score
@@ -86,4 +86,4 @@ county_split_coefficient: 10    # (this)^k is the coefficient of the w_{2+k} sco
 population_score_weight: 3175   # Weight for population score
 compactness_score_weight: 0.2686 # Weight for compactness score
 county_score_weight: 0.10893    # Weight for county split score
-vra_score_weight: 25            # Weight for VRA score
+opportunity_score_weight: 25    # Weight for VRA score
