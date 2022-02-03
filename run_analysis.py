@@ -340,7 +340,7 @@ def out_csv(chain):
         image_dir = config['output_path']
         if image_dir[-4:] == '.csv':
             image_dir = image_dir[:-4]
-        path_template = image_dir
+        path_template = image_dir.split('/')[-1]
         image_dir += '_images'
         os.makedirs(image_dir, exist_ok=True)
     with open(config['output_path'], 'w', newline='') as csvfile:
@@ -479,6 +479,8 @@ def main(config_filename, output_override=None):
         config = yaml.safe_load(config_file)
     if output_override:
         config['output_path'] = output_override
+        if '/' in output_path:
+            os.makedirs(output_path.split('/')[:-1])
     print('Initializing chain...')
     start = time.time()
     chain = get_chain()
