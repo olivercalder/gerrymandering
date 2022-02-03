@@ -11,6 +11,9 @@ pad_district_numbers: False     # Pad district numbers with leading 0s
 # Output info:
 total_steps: 100                # Total number of accepted maps to generate
 output_path: 'results_MN.csv'   # File path for output CSV
+create_images: True             # Save district map images to f'{output_path.rstrip(".csv")}_images/'
+image_interval: 1000            # Save every nth map to f'{output_path.rstrip(".csv")}_images/'
+take_every_ends: 100            # Save every map for the first and last n maps to see direct progression
 
 # Election info:
 elections:

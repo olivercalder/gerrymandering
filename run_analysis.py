@@ -13,6 +13,7 @@ import os
 import sys
 import yaml
 import time
+import multiprocessing
 
 
 accepted_partition_counter = 0
@@ -325,7 +326,21 @@ def explore_chain(chain):
     # print(partition['SSEN16'].counts('Democratic'))
 
 
+def write_plot(partition, filename):
+    partition.plot(figsize=(30, 30))
+    plt.axis('off')
+    plt.savefig(filename)
+    plt.close('all')
+
+
 def out_csv(chain):
+    if config['create_images']:
+        image_dir = config['output_path']
+        if image_dir[-4:] == '.csv':
+            image_dir = image_dir[:-4]
+        path_template = image_dir
+        image_dir += '_images'
+        os.makedirs(image_dir, exist_ok=True)
     with open(config['output_path'], 'w', newline='') as csvfile:
         f = csv.writer(csvfile)
         headings = ['State', 'avg_efficiency_gap', 'avg_partisan_bias', 'avg_mean_median', 'avg_partisan_gini', 'avg_d_seats', 'avg_r_seats']
@@ -348,12 +363,21 @@ def out_csv(chain):
         f.writerow(headings)
 
         state = 1
+        parent = None
         for partition in chain.with_progress_bar():
+            if parent is None:
+                parent = partition
             population_score = config['population_score_weight'] * compute_population_score(partition)
             compactness_score = config['compactness_score_weight'] * compute_compactness_score(partition)
             county_split_score = config['county_score_weight'] * compute_county_split_score(partition)
             opportunity_score = config['opportunity_score_weight'] * compute_opportunity_score(partition)
             total_score = population_score + compactness_score + county_split_score + opportunity_score
+
+            Q_ratio = 1
+            if Q_func(parent, partition) != 0:
+                Q_ratio = Q_func(partition, parent) / Q_func(parent, partition)
+            cut_edges = count_cut(partition)
+            cross_edges = count_cross(partition, parent)
 
             # get election metrics, seats won, and scores and add to row
             sum_eff_gap = 0.0
@@ -391,9 +415,9 @@ def out_csv(chain):
                     sum_r_seats / len(config['elections']),
                     ] + row
             row += [
-                    Q_func(partition, partition.parent) / Q_func(partition.parent, partition),
-                    count_cut(partition),
-                    count_cross(partition, partition.parent),
+                    Q_ratio,
+                    cut_edges,
+                    cross_edges,
                     total_score,
                     population_score,
                     compactness_score,
@@ -433,6 +457,14 @@ def out_csv(chain):
             row[b_opp_index] = black_opportunity_districts
             row[h_opp_index] = hisp_opportunity_districts
             f.writerow(row)
+            if config['create_images']:
+                if state == 1 \
+                        or state % config['image_interval'] == 0 \
+                        or state <= config['take_every_ends'] \
+                        or config['total_steps'] - state < config['take_every_ends']:
+                    p = multiprocessing.Process(target=write_plot, args=(partition, f'{image_dir}/{path_template}_{state}.png'))
+                    p.start()
+            parent = partition
             state += 1
 
 
