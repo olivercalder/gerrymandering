@@ -468,19 +468,15 @@ def out_csv(chain):
             state += 1
 
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('ERROR: missing config file', file=sys.stderr)
-        print(f'USAGE: python {sys.argv[0]} CONFIG_FILE [OUTPUT_FILE]', file=sys.stderr)
-        sys.exit(1)
-    config_filename = sys.argv[1]
+def main(config_filename, output_override=None):
     if not os.path.exists(config_filename):
         print(f'ERROR: config file does not exist: {config_filename}', file=sys.stderr)
         sys.exit(2)
+    global config
     with open(config_filename) as config_file:
         config = yaml.safe_load(config_file)
-    if len(sys.argv) > 2:
-        config['output_path'] = sys.argv[2]
+    if output_override:
+        config['output_path'] = output_override
     print('Initializing chain...')
     start = time.time()
     chain = get_chain()
@@ -500,6 +496,18 @@ if __name__ == '__main__':
     out_csv(chain)
     end = time.time()
     print(f'Finished outputting results in {end - start} seconds.')
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('ERROR: missing config file', file=sys.stderr)
+        print(f'USAGE: python {sys.argv[0]} CONFIG_FILE [OUTPUT_FILE]', file=sys.stderr)
+        sys.exit(1)
+    config_filename = sys.argv[1]
+    output_override = None
+    if len(sys.argv) > 2:
+        output_override = sys.argv[2]
+    main(config_filename, output_override)
 
 
 '''
