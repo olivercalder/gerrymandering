@@ -316,18 +316,6 @@ def display_chain_data(data):
     plt.show()
 
 
-def explore_chain(chain):
-    #print(partition.area)
-    for partition in chain:
-        print(type(partition.cut_edges))
-        print(partition.cut_edges)
-        print(partition.graph.edges)
-    # print(partition.perimeter)
-    # print(partition.population)
-    # print(partition['SSEN16'].wins('Democratic'))
-    # print(partition['SSEN16'].counts('Democratic'))
-
-
 def write_plot(partition, filename):
     partition.plot(figsize=(30, 30))
     plt.axis('off')
@@ -481,19 +469,12 @@ def main(config_filename, output_override=None):
         config['output_path'] = output_override
         if '/' in output_path:
             os.makedirs(output_path.split('/')[:-1])
+
     print('Initializing chain...')
     start = time.time()
     chain = get_chain()
     end = time.time()
     print(f'Finished initializing chain in {end - start} seconds.')
-    #print('Evaluating chain...')
-    #start = time.time()
-    #data = get_chain_data(chain)
-    #end = time.time()
-    #print(f'Finished evaulating chain in {end - start} seconds.')
-
-    # display_chain_data(data)
-    # explore_chain(chain)
 
     print(f'Writing results as csv to {config["output_path"]}...')
     start = time.time()
@@ -512,22 +493,3 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         output_override = sys.argv[2]
     main(config_filename, output_override)
-
-
-'''
-Output we can get:
-    Various election metrics
-        Vote counts
-        Mean-median
-        Partisan bias
-        etc.
-    Partition characteristics
-        Area
-        Perimeter
-        Cut edges
-        Interior and exterior boundaries (?)
-        All the node variables (see data readme):
-            NH_WHITE
-            NH_BLACK
-            etc
-'''
