@@ -48,6 +48,3 @@ population_score_weight: 2171   # Weight for population score
 compactness_score_weight: 0.1165 # Weight for compactness score
 county_score_weight: 0.06664    # Weight for county split score
 opportunity_score_weight: 0     # Weight for opportunity score
-
-# Normalize scores by dividing (J(E') - J(E)) by J(E)
-normalize_scores: False

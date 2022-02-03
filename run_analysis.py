@@ -18,6 +18,9 @@ import time
 accepted_partition_counter = 0
 
 
+BETA_SCALE = 23.5
+
+
 def compute_population_score(partition):
     '''
     Returns a real-valued score >= 0 related to population deviation.
@@ -169,9 +172,9 @@ def acceptance_function(partition):
     if accepted_partition_counter < 10000:
         beta = 0
     elif accepted_partition_counter < 70000:
-        beta = (accepted_partition_counter - 10000) / 60000
+        beta = BETA_SCALE * (accepted_partition_counter - 10000) / 60000
     else:
-        beta = 1
+        beta = BETA_SCALE
 
     Q2 = Q_func(partition.parent, partition)
     if Q2 == 0:
@@ -179,12 +182,12 @@ def acceptance_function(partition):
     Q1 = Q_func(partition, partition.parent)
 
     # Run into a math range error if this is computed directly without checks:
-    # p = min(1, (Q1 / Q2) * exp(-beta * (score_function(partition) - score_function(partition.parent))))
+    # p = min(1, (Q1 / Q2) * exp(-beta * (score_function(partition) - score_function(partition.parent)) / score_function(partition.parent)))
 
     # Instead, pre-compute the exponent, then evaluate it iff the exponent is less than 0
     new_score = score_function(partition)
     parent_score = score_function(partition.parent)
-    exponent = -beta * (new_score - parent_score) / (parent_score if config['normalize_scores'] else 1) + math.log(Q1 / Q2)
+    exponent = -beta * (new_score - parent_score) / parent_score + math.log(Q1 / Q2)
     # What if instead we scaled score function output by one of the scores?
     # exponent = -beta * ((score_function(partition) - score_function(partition.parent)) / score_function(partition.parent)) + math.log(Q1 / Q2)
     if exponent >= 0:
