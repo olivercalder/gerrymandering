@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from gerrychain import (GeographicPartition, Partition, Graph, MarkovChain,
                         proposals, updaters, constraints, accept, Election, metrics)
 from gerrychain.proposals import recom
@@ -13,6 +12,9 @@ import os
 import sys
 import yaml
 import time
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+mpl.use('Agg')  # Ensures matplotlib will work in non-main thread or process
 import multiprocessing
 
 
