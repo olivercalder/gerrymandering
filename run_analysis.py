@@ -156,11 +156,19 @@ def score_function(partition):
     return partition_score
 
 
+def count_cut(partition):
+    return len(partition.cut_edges)
+
+
+def count_cross(partition1, partition2):
+    return len(partition1.cut_edges - partition2.cut_edges)
+
+
 def Q_func(partition1, partition2):
     # cut edges are all the edges from one part of the partition to another
-    conflicted = len(partition1.cut_edges)
+    conflicted = count_cut(partition1)
     # cross edges are edges that were cut in the 1st but are not in the 2nd
-    cross = len(partition1.cut_edges - partition2.cut_edges)
+    cross = count_cross(partition1, partition2)
     return (cross / conflicted) / 2
 
 
@@ -328,7 +336,7 @@ def out_csv(chain):
             headings.append(election_name + '_partisan_gini')
             headings.append(election_name + '_d_seats')
             headings.append(election_name + '_r_seats')
-        headings += ['total_score', 'population_score', 'compactness_score', 'county_score', 'opportunity_score', 'black_opportunity_districts', 'hisp_opportunity_districts']
+        headings += ['Q_ratio', 'cut_edges', 'cross_edges', 'total_score', 'population_score', 'compactness_score', 'county_score', 'opportunity_score', 'black_opportunity_districts', 'hisp_opportunity_districts']
         # add vote count headings
         for i in range(config['total_districts']):
             headings.append(f'vap_{i+1:02}')
@@ -383,6 +391,9 @@ def out_csv(chain):
                     sum_r_seats / len(config['elections']),
                     ] + row
             row += [
+                    Q_func(partition, partition.parent) / Q_func(partition.parent, partition),
+                    count_cut(partition),
+                    count_cross(partition, partition.parent),
                     total_score,
                     population_score,
                     compactness_score,
