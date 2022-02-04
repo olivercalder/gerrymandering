@@ -222,7 +222,10 @@ def get_chain():
     '''
 
     # NOTE: there are a few errors in some shapefiles; remove ignore_errors to see them
-    graph = Graph.from_file(config['shapefile_path'], ignore_errors=True)
+    if '.json' in config['shapefile_path']:
+        graph = Graph.from_json(config['shapefile_path'])
+    else:
+        graph = Graph.from_file(config['shapefile_path'], ignore_errors=True)
 
     # delete islands (see gerrychain docs)
     components = list(connected_components(graph))
@@ -467,8 +470,8 @@ def main(config_filename, output_override=None):
         config = yaml.safe_load(config_file)
     if output_override:
         config['output_path'] = output_override
-        if '/' in output_path:
-            os.makedirs(output_path.split('/')[:-1])
+        if '/' in config['output_path']:
+            os.makedirs(config['output_path'].split('/')[:-1])
 
     print('Initializing chain...')
     start = time.time()
