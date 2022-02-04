@@ -471,7 +471,7 @@ def main(config_filename, output_override=None):
     if output_override:
         config['output_path'] = output_override
         if '/' in config['output_path']:
-            os.makedirs(config['output_path'].split('/')[:-1])
+            os.makedirs('/'.join(config['output_path'].split('/')[:-1]), exist_ok=True)
 
     print('Initializing chain...')
     start = time.time()
