@@ -266,7 +266,10 @@ def get_chain():
                     node_repeats=2
                     )
 
-    pop_constraint = constraints.within_percent_of_ideal_population(initial_partition, 0.02)
+    if config['override_pop_constraint']:
+        pop_constraint = constraints.within_percent_of_ideal_population(initial_partition, 1)
+    else:
+        pop_constraint = constraints.within_percent_of_ideal_population(initial_partition, 0.02)
 
     compactness_bound = constraints.UpperBound(
         lambda p: len(p['cut_edges']),
@@ -431,12 +434,17 @@ def out_csv(chain):
             black_opportunity_districts = 0
             hisp_opportunity_districts = 0
             for i in range(config['total_districts']):
-                vap_key = str(i + 1)
-                if config['pad_district_numbers']:
-                    vap_key = (len(str(config['total_districts'])) - len(vap_key)) * '0' + vap_key
-                vap = partition.vap[vap_key]
-                bvap = partition.bvap[vap_key]
-                hvap = partition.hvap[vap_key]
+                if i in partition.vap:
+                    vap = partition.vap[i]
+                    bvap = partition.bvap[i]
+                    hvap = partition.hvap[i]
+                else:
+                    vap_key = str(i + 1)
+                    if config['pad_district_numbers']:
+                        vap_key = (len(str(config['total_districts'])) - len(vap_key)) * '0' + vap_key
+                    vap = partition.vap[vap_key]
+                    bvap = partition.bvap[vap_key]
+                    hvap = partition.hvap[vap_key]
                 row.append(vap)
                 row.append(bvap)
                 row.append(hvap)

@@ -7,6 +7,7 @@ hvap_col: 'HVAP'                # Column where hispanic voting age population is
 district_col: 'CD'              # Column where district assignment is stored
 county_col: 'COUNTY'            # Column where county is stored
 pad_district_numbers: True      # Pad district numbers with leading 0s
+override_pop_constraint: False  # Ignore 2% population constraint (useful for analyzing new maps with old census data)
 
 # Output info:
 total_steps: 150000             # Total number of accepted maps to generate
