@@ -6,31 +6,31 @@ import geopandas
 from gerrychain import Graph, Partition
 import matplotlib.pyplot as plt
 
-mggg_shapefile_path = 'data/tx_mggg/TX_vtds/TX_vtds.shp'
-proposed_shapefile_path = 'zip://data/TX_proposed/tx_cong_2021.zip'
+for orig, proposed, outfile in [
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2103_0-shp.zip', "mn_seed_map_C2103.json"),
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2104_0-shp.zip', "mn_seed_map_C2104.json"),
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2105_0-shp.zip', "mn_seed_map_C2105.json"),
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2106_0-shp.zip', "mn_seed_map_C2106.json"),
+        ]:
 
-# ex = geopandas.read_file('../Ex_data/tl_2012_25_sldu.shp')
-# print("\nex:")
-# print(ex)
+    mggg_shapefile_path = orig
+    proposed_shapefile_path = proposed
 
-districts = geopandas.read_file(proposed_shapefile_path)
-units = geopandas.read_file(mggg_shapefile_path)
-# print(units)
-# print(districts)
-assignment = maup.assign(units, districts)
-# print(assignment)
+    districts = geopandas.read_file(proposed_shapefile_path)
+    units = geopandas.read_file(mggg_shapefile_path)
+    assignment = maup.assign(units, districts)
 
-units["District"] = assignment
-print(units)
+    units["District"] = assignment
+    print(units)
 
-graph = Graph.from_file(mggg_shapefile_path, ignore_errors=True)
-print("made graph")
+    graph = Graph.from_file(mggg_shapefile_path, ignore_errors=True)
+    print("Generated", outfile)
 
-# graph.join(units, columns=["District"], left_index="geometry", right_index="geometry")
-graph.join(units, columns=["District"])
-graph.to_json("tx_seed_graph.json")
+    # graph.join(units, columns=["District"], left_index="geometry", right_index="geometry")
+    graph.join(units, columns=["District"])
+    graph.to_json(outfile)
 
-real_life_plan = Partition(graph, "District")
-real_life_plan.plot(units, figsize=(10, 10), cmap="tab20")
-plt.axis('off')
-plt.show()
+    # real_life_plan = Partition(graph, "District")
+    # real_life_plan.plot(units, figsize=(10, 10), cmap="tab20")
+    # plt.axis('off')
+    # plt.show()

@@ -1,0 +1,92 @@
+# Shapefile info:
+shapefile_path: 'data/MN_proposed/mn_seed_map_C2103.json' # Path to shapefile
+population_col: 'TOTPOP'        # Column where total population is stored
+vap_col: 'VAP'                  # Column where voting age population is stored
+bvap_col: 'BVAP'                # Column where black voting age population is stored
+hvap_col: 'HVAP'                # Column where hispanic voting age population is stored
+district_col: 'District'        # Column where district assignment is stored
+county_col: 'COUNTYNAME'        # Column where county is stored
+pad_district_numbers: False     # Pad district numbers with leading 0s
+
+# Output info:
+total_steps: 1                  # Total number of accepted maps to generate
+output_path: 'results_MN.csv'   # File path for output CSV
+create_images: True             # Save district map images to f'{output_path.rstrip(".csv")}_images/'
+image_interval: 1000            # Save every nth map to f'{output_path.rstrip(".csv")}_images/'
+take_every_ends: 100            # Save every map for the first and last n maps to see direct progression
+
+# Election info:
+elections:
+  'SEN18':
+    dem_col: 'SEN18D'
+    rep_col: 'SEN18R'
+  'USH18':
+    dem_col: 'USH18D'
+    rep_col: 'USH18R'
+  # 'SSEN18':             # ran into NaN errors, seems that some districts are missing voting data
+  #   dem_col: 'SSEN18D'
+  #   rep_col: 'SSEN18R'
+  'SH18':
+    dem_col: 'SH18D'
+    rep_col: 'SH18R'
+  'GOV18':
+    dem_col: 'GOV18D'
+    rep_col: 'GOV18R'
+  'PRES16':                     # Name of the election used for partisan metrics
+    dem_col: 'PRES16D'          # Name of the column where democratic votes are stored
+    rep_col: 'PRES16R'          # Name of the column where republican votes are stored
+  'USH16':
+    dem_col: 'USH16D'
+    rep_col: 'USH16R'
+  'SSEN16':
+    dem_col: 'SSEN16D'
+    rep_col: 'SSEN16R'
+  'SH16':
+    dem_col: 'SH16D'
+    rep_col: 'SH16R'
+  'SEN14':
+    dem_col: 'SEN14D'
+    rep_col: 'SEN14R'
+  'USH14':
+    dem_col: 'USH14D'
+    rep_col: 'USH14R'
+  'SH14':
+    dem_col: 'SH14D'
+    rep_col: 'SH14R'
+  'GOV14':
+    dem_col: 'GOV14D'
+    rep_col: 'GOV14R'
+  'PRES12':
+    dem_col: 'PRES12D'
+    rep_col: 'PRES12R'
+  'SEN12':
+    dem_col: 'SEN12D' # readme says 'SEND12D'
+    rep_col: 'SEN12R'
+  'USH12':
+    dem_col: 'USH12D'
+    rep_col: 'USH12R'
+  'SSEN12':
+    dem_col: 'SSEN12D'
+    rep_col: 'SSEN12R'
+  'SH12':
+    dem_col: 'SH12D'
+    rep_col: 'SH12R'
+
+# Districts:
+total_districts: 8              # Total number of districts in the given shapefile
+
+# Opportunity Scoring:
+opportunity_threshold: 0.3      # Percent minority population to be considered "minority opportunity"
+black_opp_target: 2             # Target number of black opportunity districts
+black_opp_weight: 1             # The weight of black opportunity district scoring
+hispanic_opp_target: 0          # Target number of hispanic opportunity districts
+hispanic_opp_weight: 0          # The weight of hispanic opportunity district scoring
+
+# County Split Scoring:
+county_split_coefficient: 2     # (this)^k is the coefficient of the w_{2+k} score
+
+# Score function weights:
+population_score_weight: 3175   # Weight for population score
+compactness_score_weight: 0.2686 # Weight for compactness score
+county_score_weight: 0.10893    # Weight for county split score
+opportunity_score_weight: 0     # Weight for opportunity score

@@ -1,0 +1,53 @@
+# Shapefile info:
+shapefile_path: 'data/TX_proposed/tx_seed_graph.json' # Path to shapefile
+population_col: 'TOTPOP'        # Column where total population is stored
+vap_col: 'VAP'                  # Column where voting age population is stored
+bvap_col: 'BVAP'                # Column where black voting age population is stored
+hvap_col: 'HISPVAP'             # Column where hispanic voting age population is stored
+district_col: 'District'        # Column where district assignment is stored
+county_col: 'COUNTY'            # Column where county is stored
+pad_district_numbers: True      # Pad district numbers with leading 0s
+
+# Output info:
+total_steps: 100                # Total number of accepted maps to generate
+output_path: 'results_TX.csv'   # File path for output CSV
+create_images: True             # Save district map images to f'{output_path.rstrip(".csv")}_images/'
+image_interval: 1000            # Save every nth map to f'{output_path.rstrip(".csv")}_images/'
+take_every_ends: 100            # Save every map for the first and last n maps to see direct progression
+
+# Election info:
+elections:
+  'PRES12':
+    dem_col: 'PRES12D'
+    rep_col: 'PRES12R'
+  'SEN12':
+    dem_col: 'SEN12D'
+    rep_col: 'SEN12R'
+  'SEN14':
+    dem_col: 'SEN14D'
+    rep_col: 'SEN14R'
+  'GOV14':
+    dem_col: 'GOV14D'
+    rep_col: 'GOV14R'
+  'PRES16':                     # Name of the election used for partisan metrics
+    dem_col: 'PRES16D'          # Name of the column where democratic votes are stored
+    rep_col: 'PRES16R'          # Name of the column where republican votes are stored
+
+# Districts:
+total_districts: 38             # Total number of districts in the given shapefile
+
+# Opportunity Scoring:
+opportunity_threshold: 0.4      # Percent minority population to be considered "minority opportunity"
+black_opp_target: 4             # Target number of black opportunity districts
+black_opp_weight: 1             # The weight of black opportunity district scoring
+hispanic_opp_target: 14         # Target number of hispanic opportunity districts
+hispanic_opp_weight: 1          # The weight of hispanic opportunity district scoring
+
+# County Split Scoring:
+county_split_coefficient: 2     # (this)^k is the coefficient of the w_{2+k} score
+
+# Score function weights:
+population_score_weight: 1321   # Weight for population score
+compactness_score_weight: 0.0515 # Weight for compactness score
+county_score_weight: 0.00063345 # Weight for county split score
+opportunity_score_weight: 0     # Weight for opportunity score
