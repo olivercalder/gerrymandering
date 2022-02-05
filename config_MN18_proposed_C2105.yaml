@@ -1,5 +1,5 @@
 # Shapefile info:
-shapefile_path: 'data/MN_proposed/mn_seed_map_C2105.json' # Path to shapefile
+shapefile_path: 'data/MN_proposed/mn_proposed_map_C2105.json' # Path to shapefile
 population_col: 'TOTPOP'        # Column where total population is stored
 vap_col: 'VAP'                  # Column where voting age population is stored
 bvap_col: 'BVAP'                # Column where black voting age population is stored
@@ -11,7 +11,7 @@ pad_district_numbers: False     # Pad district numbers with leading 0s
 # Output info:
 total_steps: 1                  # Total number of accepted maps to generate
 output_path: 'results_MN.csv'   # File path for output CSV
-create_images: True             # Save district map images to f'{output_path.rstrip(".csv")}_images/'
+create_images: False            # Save district map images to f'{output_path.rstrip(".csv")}_images/'
 image_interval: 1000            # Save every nth map to f'{output_path.rstrip(".csv")}_images/'
 take_every_ends: 100            # Save every map for the first and last n maps to see direct progression
 

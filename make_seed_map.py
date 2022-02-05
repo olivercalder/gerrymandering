@@ -7,10 +7,10 @@ from gerrychain import Graph, Partition
 import matplotlib.pyplot as plt
 
 for orig, proposed, outfile in [
-        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2103_0-shp.zip', "mn_seed_map_C2103.json"),
-        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2104_0-shp.zip', "mn_seed_map_C2104.json"),
-        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2105_0-shp.zip', "mn_seed_map_C2105.json"),
-        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2106_0-shp.zip', "mn_seed_map_C2106.json"),
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2103_0-shp.zip', "mn_proposed_map_C2103.json"),
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2104_0-shp.zip', "mn_proposed_map_C2104.json"),
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2105_0-shp.zip', "mn_proposed_map_C2105.json"),
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2106_0-shp.zip', "mn_proposed_map_C2106.json"),
         ]:
 
     mggg_shapefile_path = orig
@@ -30,7 +30,8 @@ for orig, proposed, outfile in [
     graph.join(units, columns=["District"])
     graph.to_json(outfile)
 
-    # real_life_plan = Partition(graph, "District")
-    # real_life_plan.plot(units, figsize=(10, 10), cmap="tab20")
-    # plt.axis('off')
-    # plt.show()
+    real_life_plan = Partition(graph, "District")
+    real_life_plan.plot(units, figsize=(30, 30))
+    plt.axis('off')
+    plt.savefig(outfile.replace('.json', '.png'))
+    plt.close('all')
