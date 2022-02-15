@@ -11,6 +11,7 @@ for orig, proposed, outfile in [
         ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2104_0-shp.zip', "mn_proposed_map_C2104.json"),
         ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2105_0-shp.zip', "mn_proposed_map_C2105.json"),
         ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_proposed/c2106_0-shp.zip', "mn_proposed_map_C2106.json"),
+        ('data/mn_mggg/MN12_18/mn_precincts12_18.shp', 'zip://data/MN_accepted/c2022-shp.zip', "mn_accepted_map.json"),
         ]:
 
     mggg_shapefile_path = orig
