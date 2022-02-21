@@ -1,0 +1,799 @@
+---
+title: "mn_analysis_2"
+author: "Eva Airoldi"
+date: "1/25/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gganimate)
+library(ggthemes)
+```
+
+```{r read_in}
+mn1 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_final/results_MN/results_MN_1.csv") %>%
+  mutate(chain = 1) %>% filter(State >= 10000)
+
+mn2 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_final/results_MN/results_MN_2.csv") %>%
+  mutate(chain=2) %>% filter(State >= 10000)
+
+mn3 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_final/results_MN/results_MN_3.csv")%>%
+  mutate(chain = 3) %>% filter(State >= 10000)
+
+mn4 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_final/results_MN/results_MN_4.csv")%>%
+  mutate(chain = 4) %>% filter(State >= 10000)
+
+mn5 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_final/results_MN/results_MN_5.csv")%>%
+  mutate(chain = 5) %>% filter(State >= 10000)
+
+mn <- rbind(mn1, mn2, mn3, mn4, mn5)
+mn <- mn %>% mutate(Map = 1:nrow(mn_full))
+
+#write_csv(mn, "mn_bound.csv")
+
+mn <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Minnesota/mn_bound.csv")
+
+mn_og <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_final/results_MN/results_MN_1.csv") %>% filter(State == 1)
+
+prop1 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/prop103.csv")
+
+prop2 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/prop104.csv")
+
+accepted <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_MN_accepted.csv")
+
+prop3 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/prop105.csv")
+
+prop4 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/prop106.csv")
+
+props <- rbind(mn_og, prop1, prop2, accepted)
+```
+
+```{r sen18_histograms}
+pdf("mn_sen18_histograms_eg.pdf")
+ggplot() +
+  geom_histogram(data = mn, aes(SEN18_efficiency_gap), bins = 2500) +
+  labs(title= "Minnesota Ensemble 2018 Senate Election \nEfficiency Gap", color = "Maps", y = "Map Count", x = "Efficiency Gap Score") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text())
+dev.off()
+
+pdf("mn_sen18_histograms_pb.pdf")
+ggplot() +
+  geom_bar(data = mn, aes(SEN18_partisan_bias)) +
+  labs(title= "Minnesota Ensemble 2018 Senate Election \nPartisan Bias", color = "Maps", x = "Partisan Bias Score", y = "Map Count") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text())
+dev.off()
+
+pdf("mn_sen18_histograms_mm.pdf")
+ggplot() +
+  geom_histogram(data = mn, aes(SEN18_mean_median), bins = 2500) +
+  labs(title= "Minnesota Ensemble 2018 Senate Election \nMean Median", color = "Maps", x = "Mean Median Score", y = "Map Count") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text())
+dev.off()
+
+pdf("mn_sen18_histograms_pg.pdf")
+ggplot() +
+  geom_histogram(data = mn, aes(SEN18_partisan_gini), bins = 2500) +
+  labs(title= "Minnesota Ensemble 2018 Senate Election \nPartisan Gini", color = "Maps", x = "Partisan Gini Score", y = "Map Count") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text())
+dev.off()
+
+pdf("mn_sen18_histograms_ds_big.pdf")
+ggplot() +
+  geom_bar(data = mn, aes(SEN18_d_seats)) +
+  labs(title= "Minnesota Ensemble 2018 Senate \nElection Democratic Seats", color = "Maps", x = "Number of Democratic Seats", y="Map Count") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(size=rel(1), face = "bold"), 
+    axis.title = element_text(size = rel(1.25), face= "bold"),
+    axis.text = element_text(size=rel(1.25), face = "bold"),
+    plot.title=element_text(size=rel(2),hjust = 0.5)) +
+  guides(color=guide_legend(nrow=2, byrow=TRUE))
+dev.off()
+
+pdf("mn_sen18_histograms_rs.pdf")
+ggplot() +
+  geom_bar(data = mn, aes(SEN18_r_seats)) +
+  labs(title= "Minnesota Ensemble 2018 Senate Election \nRepublican Seats", color = "Maps", x = "Number of Republican Seats", y="Map Count") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text())
+dev.off()
+```
+
+```{r final_histograms_w/2020}
+ggplot() +
+  geom_histogram(data = mn, aes(avg_efficiency_gap), bins = 2500) +
+  labs(title= "Minnesota Ensemble Average Efficiency Gap", color = "Maps", y = "Map Count", x = "Efficiency Gap Score") +
+  geom_vline(data = props, aes(xintercept = avg_efficiency_gap[1], color = str_c("2010 Map \n", round(avg_efficiency_gap[1],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_efficiency_gap[2], color = str_c("Wattson, et al.\n", round(avg_efficiency_gap[2],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_efficiency_gap[3], color = str_c("Sachs, et al.\n", round(avg_efficiency_gap[3],4))), size = 1) +
+      geom_vline(data = props, aes(xintercept=avg_efficiency_gap[4], color = str_c("2020 Map\n",round(avg_efficiency_gap[4],4) )), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_efficiency_gap)+sd(avg_efficiency_gap)),size=0.75, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_efficiency_gap) -sd(avg_efficiency_gap)), size=0.75, linetype ="dashed") +
+  geom_vline(data=mn, aes(xintercept = mean(avg_efficiency_gap)),size = 0.75, color = "black")+
+  annotate("label", x =c((mean(mn$avg_efficiency_gap)+sd(mn$avg_efficiency_gap)),(mean(mn$avg_efficiency_gap)-sd(mn$avg_efficiency_gap)),mean(mn$avg_efficiency_gap)), y= 1250, label = c("+1 SD", "-1 SD", "Mean"))+
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+
+ggsave("mn_final_histograms_eg_new.png", device="png")
+
+
+ggplot() +
+  geom_histogram(data = mn, aes(avg_partisan_bias), color="white") +
+  labs(title= "Minnesota Ensemble Average Partisan Bias", color = "Maps", y = "Map Count", x = "Partisan Bias Score") +
+  geom_vline(data = props, aes(xintercept = avg_partisan_bias[1], color = str_c("2010 Map \n", round(avg_partisan_bias[1],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_bias[2], color = str_c("Wattson, et al.\n", round(avg_partisan_bias[2],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_bias[3], color = str_c("Sachs, et al.\n", round(avg_partisan_bias[3],4))), size = 1) +
+      geom_vline(data = props, aes(xintercept=avg_partisan_bias[4], color = str_c("2020 Map\n",round(avg_partisan_bias[4],4) )), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_partisan_bias)+sd(avg_partisan_bias)),size=0.75, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_partisan_bias) -sd(avg_partisan_bias)), size=0.75, linetype ="dashed") +
+  geom_vline(data=mn, aes(xintercept = mean(avg_partisan_bias)),size = 0.75, color = "black")+
+  annotate("label", x =c((mean(mn$avg_partisan_bias)+sd(mn$avg_partisan_bias)),(mean(mn$avg_partisan_bias)-sd(mn$avg_partisan_bias)),mean(mn$avg_partisan_bias)), y= 100000, label = c("+1 SD", "-1 SD", "Mean"))+
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+ggsave("mn_final_histograms_pb_new.png", device="png")
+
+
+ggplot() +
+  geom_histogram(data = mn, aes(avg_mean_median), bins = 2500) +
+  labs(title= "Minnesota Ensemble Average Mean Median Score", color = "Maps", y = "Map Count", x = "Mean Median Score") +
+  geom_vline(data = props, aes(xintercept = avg_mean_median[1], color = str_c("2010 Map \n", round(avg_mean_median[1],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_mean_median[2], color = str_c("Wattson, et al.\n", round(avg_mean_median[2],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_mean_median[3], color = str_c("Sachs, et al.\n", round(avg_mean_median[3],4))), size = 1) +
+      geom_vline(data = props, aes(xintercept=avg_mean_median[4], color = str_c("2020 Map\n",round(avg_mean_median[4],4) )), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_mean_median)+sd(avg_mean_median)),size=0.75, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_mean_median) -sd(avg_mean_median)), size=0.75, linetype ="dashed") +
+  geom_vline(data=mn, aes(xintercept = mean(avg_mean_median)),size = 0.75, color = "black")+
+  annotate("label", x =c((mean(mn$avg_mean_median)+sd(mn$avg_mean_median)),(mean(mn$avg_mean_median)-sd(mn$avg_mean_median)),mean(mn$avg_mean_median)), y= 1100, label = c("+1 SD", "-1 SD", "Mean"))+
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+
+ggsave("mn_final_histograms_mm_new.png", device="png")
+
+
+ggplot() +
+  geom_histogram(data = mn, aes(avg_partisan_gini), bins = 2500) +
+  labs(title= "Minnesota Ensemble Average Partisan Gini", color = "Maps", y = "Map Count", x = "Partisan Gini Score") +
+  geom_vline(data = props, aes(xintercept = avg_partisan_gini[1], color = str_c("2010 Map \n", round(avg_partisan_gini[1],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_gini[2], color = str_c("Wattson, et al.\n", round(avg_partisan_gini[2],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_gini[3], color = str_c("Sachs, et al.\n", round(avg_partisan_gini[3],4))), size = 1) +
+      geom_vline(data = props, aes(xintercept=avg_partisan_gini[4], color = str_c("2020 Map\n",round(avg_partisan_gini[4],4) )), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_partisan_gini)+sd(avg_partisan_gini)),size=0.75, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_partisan_gini) -sd(avg_partisan_gini)), size=0.75, linetype ="dashed") +
+  geom_vline(data=mn, aes(xintercept = mean(avg_partisan_gini)),size = 0.75, color = "black")+
+  annotate("label", x =c((mean(mn$avg_partisan_gini)+sd(mn$avg_partisan_gini)),(mean(mn$avg_partisan_gini)-sd(mn$avg_partisan_gini)),mean(mn$avg_partisan_gini)), y= 675, label = c("+1 SD", "-1 SD", "Mean"))+
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+
+ggsave("mn_final_histograms_pg_new.png", device="png")
+
+
+ggplot() +
+  geom_bar(data = mn, aes(avg_d_seats), color="white") +
+  labs(title= "Minnesota Ensemble Average Democratic Seats", color = "Maps", y = "Map Count", x = "Number of Seats") +
+  geom_vline(data = props, aes(xintercept = avg_d_seats[1], color = str_c("2010 Map \n", round(avg_d_seats[1],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_d_seats[2], color = str_c("Wattson, et al.\n", round(avg_d_seats[2],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_d_seats[3], color = str_c("Sachs, et al.\n", round(avg_d_seats[3],4))), size = 1) +
+      geom_vline(data = props, aes(xintercept=avg_d_seats[4], color = str_c("2020 Map\n",round(avg_d_seats[4],4) )), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_d_seats)+sd(avg_d_seats)),size=0.75, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_d_seats) -sd(avg_d_seats)), size=0.75, linetype ="dashed") +
+  geom_vline(data=mn, aes(xintercept = mean(avg_d_seats)),size = 0.75, color = "black")+
+  annotate("label", x =c((mean(mn$avg_d_seats)+sd(mn$avg_d_seats)),(mean(mn$avg_d_seats)-sd(mn$avg_d_seats)),mean(mn$avg_d_seats)), y= 60010, label = c("+1 SD", "-1 SD", "Mean"))+
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="grey90"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+ggsave("mn_final_histograms_ds_new.png", device="png")
+
+ggplot() +
+  geom_bar(data = mn, aes(avg_r_seats)) +
+  labs(title= "Minnesota Ensemble Average Republican Seats", color = "Maps", y = "Map Count", x = "Number of Seats") +
+  geom_vline(data = props, aes(xintercept = avg_r_seats[1], color = str_c("2010 Map \n", round(avg_r_seats[1],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_r_seats[2], color = str_c("Wattson, et al.\n", round(avg_r_seats[2],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_r_seats[3], color = str_c("Sachs, et al.\n", round(avg_r_seats[3],4))), size = 1) +
+      geom_vline(data = props, aes(xintercept=avg_r_seats[4], color = str_c("2020 Map\n",round(avg_r_seats[4],4) )), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_r_seats)+sd(avg_r_seats)),size=0.75, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_r_seats) -sd(avg_r_seats)), size=0.75, linetype ="dashed") +
+  geom_vline(data=mn, aes(xintercept = mean(avg_r_seats)),size = 0.75, color = "black")+
+  annotate("label", x =c((mean(mn$avg_r_seats)+sd(mn$avg_r_seats)),(mean(mn$avg_r_seats)-sd(mn$avg_r_seats)),mean(mn$avg_r_seats)), y= 60010, label = c("+1 SD", "-1 SD", "Mean"))+
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="grey90"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+
+ggsave("mn_final_histograms_rs_new.png", device="png")
+```
+
+```{r presentation_histograms}
+pdf("mn_final_histograms_pb_new.pdf")
+ggplot() +
+  geom_bar(data = mn, aes(avg_partisan_bias)) +
+  labs(title= "Minnesota Ensemble \nAverage Partisan Bias", color = "Maps", x = "Partisan Bias Score", y = "Map Count") +
+  geom_vline(data = props, aes(xintercept = avg_partisan_bias[1], color = str_c("2010 Map \n", round(avg_partisan_bias[1],4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_bias[2], color = str_c("Wattson, et al. \n", round(avg_partisan_bias[2],4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_bias[3], color = str_c("Sachs, et al. \n", round(avg_partisan_bias[3],4))), size = 1.25) +
+      geom_vline(aes(xintercept=-0.1397, color = "2020 Map\n-0.1397"), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_partisan_bias)+sd(avg_partisan_bias), color = "SD"),size=1, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_partisan_bias) -sd(avg_partisan_bias), color = "SD"),size=1, linetype ="dashed") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(size=rel(1), face = "bold"), 
+    axis.title = element_text(size = rel(1.25), face= "bold"),
+    axis.text = element_text(size=rel(1.25), face = "bold"),
+    plot.title=element_text(size=rel(2),hjust = 0.5))
+dev.off()
+
+pdf("mn_final_histograms_mm_new.pdf")
+ggplot() +
+  geom_histogram(data = mn, aes(avg_mean_median), bins = 2500) +
+  labs(title= "Minnesota Ensemble \nAverage Mean Median", color = "Maps", x = "Mean Median Score", y = "Map Count") +
+  geom_vline(data = props, aes(xintercept = avg_mean_median[1], color = str_c("2010 Map \n", round(avg_mean_median[1],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_mean_median[2], color = str_c("Wattson, et al. \n", round(avg_mean_median[2],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_mean_median[3], color = str_c("Sachs, et al. \n", round(avg_mean_median[3],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_mean_median[4], color = str_c("Corrie, et al. \n", round(avg_mean_median[4],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_mean_median[5], color = str_c("Anderson, et al. \n", round(avg_mean_median[5],4))), size = 1)  +
+        geom_vline(aes(xintercept=-0.0273, color = "2020 Map\n-0.0273"), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_mean_median)+sd(avg_mean_median), color = "SD"),size=1, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_mean_median) -sd(avg_mean_median), color = "SD"),size=1, linetype ="dashed") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(size=rel(1), face = "bold"), 
+    axis.title = element_text(size = rel(1.25), face= "bold"),
+    axis.text = element_text(size=rel(1.25), face = "bold"),
+    plot.title=element_text(size=rel(2),hjust = 0.5)) +
+  guides(color=guide_legend(nrow=2, byrow=TRUE))
+dev.off()
+
+pdf("mn_final_histograms_pg_new.pdf")
+ggplot() +
+  geom_histogram(data = mn, aes(avg_partisan_gini), bins = 2500) +
+  labs(title= "Minnesota Ensemble \nAverage Partisan Gini", color = "Maps", x = "Partisan Gini Score", y = "Map Count") +
+  geom_vline(data = props, aes(xintercept = avg_partisan_gini[1], color = str_c("2010 Map \n", round(avg_partisan_gini[1],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_gini[2], color = str_c("Wattson, et al. \n", round(avg_partisan_gini[2],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_gini[3], color = str_c("Sachs, et al. \n", round(avg_partisan_gini[3],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_gini[4], color = str_c("Corrie, et al. \n", round(avg_partisan_gini[4],4))), size = 1) +
+  geom_vline(data = props, aes(xintercept = avg_partisan_gini[5], color = str_c("Anderson, et al. \n", round(avg_partisan_gini[5],4))), size = 1)+
+      geom_vline(aes(xintercept=0.05, color = "2020 Map\n0.05"), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_partisan_gini)+sd(avg_partisan_gini), color = "SD"),size=1, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_partisan_gini) -sd(avg_partisan_gini), color = "SD"),size=1, linetype ="dashed") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(size=rel(1), face = "bold"), 
+    axis.title = element_text(size = rel(1.25), face= "bold"),
+    axis.text = element_text(size=rel(1.25), face = "bold"),
+    plot.title=element_text(size=rel(2),hjust = 0.5)) +
+  guides(color=guide_legend(nrow=2, byrow=TRUE))
+dev.off()
+
+pdf("mn_final_histograms_ds_new.pdf")
+ggplot() +
+  geom_bar(data = mn, aes(avg_d_seats)) +
+  labs(title= "Minnesota Ensemble \nAverage Democratic Seats", color = "Maps", x = "Number of Democratic Seats", y="Map Count") +
+  geom_vline(data = props, aes(xintercept = avg_d_seats[1], color = str_c("2010 Map \n", round(avg_d_seats[1], 4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_d_seats[2], color = str_c("Wattson, et al. \n", round(avg_d_seats[2], 4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_d_seats[3], color = str_c("Sachs, et al. \n", round(avg_d_seats[3], 4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_d_seats[4], color = str_c("Corrie, et al. \n", round(avg_d_seats[4], 4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_d_seats[5], color = str_c("Anderson, et al. \n", round(avg_d_seats[5], 4))), size = 1.25)  +
+        geom_vline(aes(xintercept=4.765, color = "2020 Map\n4.765"), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_d_seats)+sd(avg_d_seats), color = "SD"),size=1, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_d_seats) -sd(avg_d_seats), color = "SD"),size=1, linetype ="dashed") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(size=rel(1), face = "bold"), 
+    axis.title = element_text(size = rel(1.25), face= "bold"),
+    axis.text = element_text(size=rel(1.25), face = "bold"),
+    plot.title=element_text(size=rel(2),hjust = 0.5)) +
+  guides(color=guide_legend(nrow=2, byrow=TRUE))
+dev.off()
+
+pdf("mn_final_histograms_rs_new.pdf")
+ggplot() +
+  geom_bar(data = mn, aes(avg_r_seats)) +
+  labs(title= "Minnesota Ensemble \nAverage Republican Seats", color = "Maps", x = "Number of Republican Seats", y="Map Count") +
+  geom_vline(data = props, aes(xintercept = avg_r_seats[1], color = str_c("2010 Map \n", round(avg_r_seats[1], 4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_r_seats[2], color = str_c("Wattson, et al. \n", round(avg_r_seats[2], 4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_r_seats[3], color = str_c("Sachs, et al. \n", round(avg_r_seats[3], 4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_r_seats[4], color = str_c("Corrie, et al. \n", round(avg_r_seats[4], 4))), size = 1.25) +
+  geom_vline(data = props, aes(xintercept = avg_r_seats[5], color = str_c("Anderson, et al. \n", round(avg_r_seats[5], 4))), size = 1.25)  +
+        geom_vline(aes(xintercept=3.235, color = "2020 Map\n3.235"), size = 1)+
+  geom_vline(data = mn, aes(xintercept = mean(avg_r_seats)+sd(avg_r_seats), color = "SD"),size=1, linetype ="dashed") +
+    geom_vline(data = mn, aes(xintercept =mean(avg_r_seats) -sd(avg_r_seats), color = "SD"),size=1, linetype ="dashed") +
+  scale_color_colorblind() +
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(size=rel(1), face = "bold"), 
+    axis.title = element_text(size = rel(1.25), face= "bold"),
+    axis.text = element_text(size=rel(1.25), face = "bold"),
+    plot.title=element_text(size=rel(2),hjust = 0.5)) +
+  guides(color=guide_legend(nrow=2, byrow=TRUE))
+dev.off()
+```
+
+```{r sen18_boxplot}
+props_tidy_18 <- props %>%
+  mutate(Map = 1:4) %>% 
+  select(Map, starts_with("SEN18")) %>%
+  pivot_longer(!c(Map,
+                  SEN18_partisan_bias,
+                  SEN18_efficiency_gap,
+                  SEN18_partisan_gini,
+                  SEN18_mean_median,
+                  SEN18_d_seats,
+                  SEN18_r_seats),
+                 names_prefix = "SEN18_",
+               names_to = c(".value", "district"),
+               names_sep = -2)  
+
+props_tidy_18 <- props_tidy_18 %>% mutate(voteshareD = d_count_/(r_count_ + d_count_),
+                         voteshareR = r_count_/(r_count_+d_count_))
+
+props_district_ordered_18 <- props_tidy_18 %>% select(Map, voteshareD, voteshareR, district) %>% group_by(Map) %>% arrange((voteshareD), .by_group = TRUE) %>% mutate(districtOrder = 1:8) %>%
+  mutate(districtOrder = as.factor(districtOrder), Map = as.factor(Map))
+
+mn_tidy_sen18 <- mn %>% select(State, starts_with("SEN18"), chain, Map) %>%
+    pivot_longer(!c(State,
+                  Map,
+                  chain,
+                  SEN18_partisan_bias,
+                  SEN18_efficiency_gap,
+                  SEN18_partisan_gini,
+                  SEN18_mean_median,
+                  SEN18_d_seats,
+                  SEN18_r_seats),
+                 names_prefix = "SEN18_",
+               names_to = c(".value", "district"),
+               names_sep = -2) 
+
+mn_tidy_sen18 <- mn_tidy_sen18 %>% mutate(voteshareD = d_count_/(r_count_ + d_count_),
+                         voteshareR = r_count_/(r_count_+d_count_))
+
+mn_tidy_sen18_cut <- mn_tidy_sen18 %>% select(State, Map, chain, voteshareD, voteshareR, district) %>% group_by(Map)
+
+all_district_ordered_18 <- mn_tidy_sen18_cut %>% arrange((voteshareD), .by_group = TRUE) %>% mutate(districtOrder = 1:8) 
+
+all_district_ordered_18 <- all_district_ordered_18 %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+ggplot() +
+  geom_boxplot(data = all_district_ordered_18, aes(x = districtOrder, y=voteshareD)) +
+  geom_point(data =props_district_ordered_18 %>% filter(Map == 1), aes(x=districtOrder, y =voteshareD, color="2010 Map"), size = 3) +
+  geom_point(data = props_district_ordered_18 %>% filter(Map == 2), aes(x=districtOrder, y=voteshareD, color ="Wattson, et al."), size=3) +
+  geom_point(data = props_district_ordered_18 %>% filter(Map == 3), aes(x=districtOrder, y=voteshareD, color ="Sachs, et al."), size = 3) +
+  geom_point(data = props_district_ordered_18 %>% filter(Map == 4), aes(x=districtOrder, y=voteshareD, color ="2020 Map"), size = 3) +
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  labs(title = "Minnesota 2018 Senate Election Ensemble",x="Districts ordered by Democratic Vote Share",
+       y = "Democratic Vote Share", color = "Maps") +
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title.y = element_text(),
+    axis.text.y = element_text(),
+    axis.title.x = element_text(),
+    axis.text.x = element_text(),
+    plot.title=element_text(hjust = 0.5)) 
+
+ggsave("mn_sen18_box_new.png", device = "png")
+```
+
+```{r ensemble_scores}
+ggplot() +
+  geom_histogram(data = mn, aes(total_score), bins = 1500) +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), axis.title = element_text()) +
+  labs(title = "Minnesota Ensemble Total Score", x="Total Score", y="Map Count") +
+  theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+ggsave("mn_total_score_end.png", device="png")
+
+
+ggplot() +
+  geom_histogram(data = mn, aes(population_score), bins=1500) + 
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), axis.title = element_text()) +
+  labs(title = "Minnesota Ensemble Population Score", x="Population Score", y="Map Count") +
+    theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+
+ggsave("mn_population_score_new.png", device = "png")
+
+ggplot() +
+  geom_histogram(data = mn, aes(county_score), bins=1500) + 
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), axis.title = element_text()) +
+  labs(title = "Minnesota Ensemble County Score", x="County Score", y="Map Count")+
+      theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+ggsave("mn_county_score_new.png", device="png")
+
+
+ggplot() +
+  geom_histogram(data = mn, aes(compactness_score), bins=1500) + 
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), axis.title = element_text()) +
+  labs(title = "Minnesota Ensemble Compactness Score", x="Compactness Score", y="Map Count")+
+        theme_fivethirtyeight()+
+  theme(
+    plot.background = element_rect(fill="white"),
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title = element_text(),
+    axis.text = element_text(),
+    plot.title=element_text(hjust = 0.5))
+ggsave("mn_compactness_score_new.png", device = "png")
+```
+
+```{r pres16_boxplot}
+props_tidy_16 <- props %>%
+  mutate(Map = 1:4) %>% 
+  select(Map, starts_with("PRES16")) %>%
+  pivot_longer(!c(Map,
+                  PRES16_partisan_bias,
+                  PRES16_efficiency_gap,
+                  PRES16_partisan_gini,
+                  PRES16_mean_median,
+                  PRES16_d_seats,
+                  PRES16_r_seats),
+                 names_prefix = "PRES16_",
+               names_to = c(".value", "district"),
+               names_sep = -2)  
+
+props_tidy_16 <- props_tidy_16 %>% mutate(voteshareD = d_count_/(r_count_ + d_count_),
+                         voteshareR = r_count_/(r_count_+d_count_))
+
+props_district_ordered_16 <- props_tidy_16 %>% select(Map, voteshareD, voteshareR, district) %>% group_by(Map) %>% arrange((voteshareD), .by_group = TRUE) %>% mutate(districtOrder = 1:8) %>%
+  mutate(districtOrder = as.factor(districtOrder), Map = as.factor(Map))
+
+mn_tidy_pres16 <- mn %>% select(State, starts_with("PRES16"), chain, Map) %>%
+    pivot_longer(!c(State,
+                  Map,
+                  chain,
+                  PRES16_partisan_bias,
+                  PRES16_efficiency_gap,
+                  PRES16_partisan_gini,
+                  PRES16_mean_median,
+                  PRES16_d_seats,
+                  PRES16_r_seats),
+                 names_prefix = "PRES16_",
+               names_to = c(".value", "district"),
+               names_sep = -2) 
+
+mn_tidy_pres16 <- mn_tidy_pres16 %>% mutate(voteshareD = d_count_/(r_count_ + d_count_),
+                         voteshareR = r_count_/(r_count_+d_count_))
+
+mn_tidy_pres16_cut <- mn_tidy_pres16 %>% select(State, Map, chain, voteshareD, voteshareR, district) %>% group_by(Map)
+
+all_district_ordered_16 <- mn_tidy_pres16_cut %>% arrange((voteshareD), .by_group = TRUE) %>% mutate(districtOrder = 1:8) 
+
+all_district_ordered_16 <- all_district_ordered_16 %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+ggplot() +
+  geom_boxplot(data = all_district_ordered_16, aes(x = districtOrder, y=voteshareD)) +
+  geom_point(data =props_district_ordered_16 %>% filter(Map == 1), aes(x=districtOrder, y =voteshareD, color="2010 Map"), size = 3) +
+  geom_point(data = props_district_ordered_16 %>% filter(Map == 2), aes(x=districtOrder, y=voteshareD, color ="Wattson, et al."), size = 3) +
+  geom_point(data = props_district_ordered_16 %>% filter(Map == 3), aes(x=districtOrder, y=voteshareD, color ="Sachs, et al."), size = 3) +
+  geom_point(data = props_district_ordered_16 %>% filter(Map == 4), aes(x=districtOrder, y=voteshareD, color ="2020 Map"), size = 3) +
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) +  
+  labs(title = "Minnesota 2016 Presidential Election Ensemble", y = "Democratic Vote Share", color = "Maps", x="District Ordered by Democratic Vote Share") +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"),
+        panel.background = element_rect(fill="white"),
+        legend.background = element_rect(fill="white"),
+        legend.key = (element_rect(fill = "white")),
+        legend.title = element_blank(), 
+        axis.title = element_text(),
+        plot.title = element_text(hjust = 0.5))
+
+ggsave("mn_pres16_box_new.png", device="png")
+```
+
+```{r box_plot_stuff_vap}
+mn_tidy_vap <- mn %>% select(State, starts_with("bvap"), starts_with("hvap"), starts_with("vap"), chain, Map) %>%
+    pivot_longer(!c(State,
+                  Map,
+                  chain),
+               names_to = c(".value", "district"),
+               names_sep = -2) 
+
+mn_tidy_vap <- mn_tidy_vap %>% mutate(bProp = bvap_/(vap_),
+                         hProp = hvap_/(vap_))
+
+props_tidy_vap <- props %>% 
+   mutate(Map = 1:4) %>% 
+  select(State, Map, starts_with("bvap"), starts_with("hvap"), starts_with("vap")) %>%
+    pivot_longer(!c(State,
+                    Map),
+               names_to = c(".value", "district"),
+               names_sep = -2) 
+
+props_tidy_vap <- props_tidy_vap %>% mutate(bProp = bvap_/(vap_),
+                         hProp = hvap_/(vap_))
+
+vap_district_ordered <- mn_tidy_vap %>% select(State, Map, chain, district, vap_, bProp, hProp) %>% group_by(Map) %>% arrange((vap_), .by_group = TRUE) %>% mutate(districtOrder = 1:8) %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+hvap_district_ordered <- mn_tidy_vap %>% select(State, Map, chain, district, hProp) %>% group_by(Map) %>% arrange((hProp), .by_group = TRUE) %>% mutate(districtOrder = 1:8) %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+bvap_district_ordered <- mn_tidy_vap %>% select(State, Map, chain, district, bProp) %>% group_by(Map) %>% arrange((bProp), .by_group = TRUE) %>% mutate(districtOrder = 1:8) %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+props_vap_district_ordered <- props_tidy_vap %>% select(State, Map, district, vap_, bProp, hProp) %>% group_by(Map) %>% arrange((vap_), .by_group = TRUE) %>% mutate(districtOrder = 1:8) %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+props_hvap_district_ordered <- props_tidy_vap %>% select(State, Map, district, hProp) %>% group_by(Map) %>% arrange((hProp), .by_group = TRUE) %>% mutate(districtOrder = 1:8) %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+props_bvap_district_ordered <- props_tidy_vap %>% select(State, Map, district, bProp) %>% group_by(Map) %>% arrange((bProp), .by_group = TRUE) %>% mutate(districtOrder = 1:8) %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+
+ggplot(vap_district_ordered) +
+  geom_boxplot(aes(x = districtOrder, y=vap_)) +
+  geom_point(data =props_vap_district_ordered %>% filter(Map == 1), aes(x=districtOrder, y =vap_, color="2010 Map"), size = 3) +
+  geom_point(data = props_vap_district_ordered %>% filter(Map == 2), aes(x=districtOrder, y=vap_, color ="Wattson, et al."), size = 3) +
+  geom_point(data = props_vap_district_ordered %>% filter(Map == 3), aes(x=districtOrder, y=vap_, color ="Sachs, et al."), size = 3) +
+  geom_point(data = props_vap_district_ordered %>% filter(Map == 4), aes(x=districtOrder, y=vap_, color ="2020 Map"), size = 3) +
+  labs(title = "Minnesota Ensemble Voting Age Population", y = "Voting Age Population", x = "District Ordered by  Voting Age Population") +
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title.y = element_text(),
+    axis.text.y = element_text(),
+    axis.title.x = element_text(),
+    axis.text.x = element_text(),
+    plot.title=element_text(hjust = 0.5))
+
+ggsave("mn_vap_box_new.png", device = "png")
+
+ggplot(hvap_district_ordered) +
+  geom_boxplot(aes(x = districtOrder, y=hProp)) +
+  geom_point(data =props_hvap_district_ordered %>% filter(Map == 1), aes(x=districtOrder, y =hProp, color="2010 Map"), size = 3) +
+  geom_point(data = props_hvap_district_ordered %>% filter(Map == 2), aes(x=districtOrder, y=hProp, color ="Wattson, et al."), size = 3) +
+  geom_point(data = props_hvap_district_ordered %>% filter(Map == 3), aes(x=districtOrder, y=hProp, color ="Sachs, et al."), size = 3) +
+  geom_point(data = props_hvap_district_ordered %>% filter(Map == 4), aes(x=districtOrder, y=hProp, color ="2020 Map"), size = 3) +
+  labs(title = "Minnesota Ensemble Hispanic Proportion of Voting Age Population", y = "Hispanic Proportion", x = "District Ordered by Hispanic Voting Age Population Proportion") +
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title.y = element_text(),
+    axis.text.y = element_text(),
+    axis.title.x = element_text(),
+    axis.text.x = element_text(),
+    plot.title=element_text(hjust = 0.5))
+
+ggsave("mn_hvap_box.png", device="png")
+
+ggplot(bvap_district_ordered) +
+  geom_boxplot(aes(x = districtOrder, y=bProp)) +
+  geom_point(data =props_bvap_district_ordered %>% filter(Map == 1), aes(x=districtOrder, y =bProp, color="2010 Map"), size = 3) +
+  geom_point(data = props_bvap_district_ordered %>% filter(Map == 2), aes(x=districtOrder, y=bProp, color ="Wattson, et al."), size = 3) +
+  geom_point(data = props_bvap_district_ordered %>% filter(Map == 3), aes(x=districtOrder, y=bProp, color ="Sachs, et al."), size = 3) +
+  geom_point(data = props_bvap_district_ordered %>% filter(Map == 4), aes(x=districtOrder, y=bProp, color ="2020 Map"), size = 3) +
+  labs(title = "Minnesota Ensemble Black Proportion of Voting Age Population", y = "Black Proportion", x = "District Ordered by Black Voting Age Population Proportion") +
+  scale_color_manual(values = c("#999999", "#CC79A7", "#009E73", "#E69f00")) + 
+  theme_fivethirtyeight() +
+  theme(
+    plot.background = element_rect(fill="white"), 
+    panel.background = element_rect(fill="white"),
+    legend.background = element_rect(fill="white"), 
+    legend.key = (element_rect(fill = "white")), 
+    legend.title = element_blank(), 
+    legend.text = element_text(), 
+    axis.title.y = element_text(),
+    axis.text.y = element_text(),
+    axis.title.x = element_text(),
+    axis.text.x = element_text(),
+    plot.title=element_text(hjust = 0.5))
+
+ggsave("mn_bvap_box_new.png", device="png")
+```
+
+```{r seats_votes}
+sv_stuff <- all_district_ordered_16 %>% select(Map, State, districtOrder, district, voteshareD, voteshareR) %>% group_by(districtOrder) %>% summarize(avgD = mean(voteshareD), avgR = mean(voteshareR))
+
+d <- sv_stuff$avgD
+r <- sv_stuff$avgR
+
+map1d_sv <- seatsVotes(d)
+map1r_sv <- seatsVotes(r)
+
+par(new=FALSE)
+plot(map1d_sv, col = "blue")
+par(new=TRUE)
+add_line(map1r_sv, col = "red")
+```
+
+
+```{r animated_histograms}
+anim_save("mn_avg_efficiency_gap.gif", ggplot(mn_full %>% arrange(State)) +
+  geom_histogram(aes(avg_efficiency_gap), bins = 2500) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text()) +
+  labs(title = "Minnesota Complete Ensemble \nAverage Efficiency Gap", x= "Efficiency Gap", y="Map Count"))
+
+anim_save("mn_avg_partisan_bias.gif", ggplot(mn_full %>% arrange(State)) +
+  geom_bar(aes(avg_partisan_bias)) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Minnesota Complete Ensemble \nAverage Partisan Bias", x= "Partisan Bias", y="Map Count") +
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text()))
+
+anim_save("mn_avg_partisan_gini.gif", ggplot(mn_full %>% arrange(State)) +
+  geom_histogram(aes(avg_partisan_gini), bins = 2500) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Minnesota Complete Ensemble \nAverage Partisan Gini", x= "Partisan Gini", y="Map Count")+
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text()))
+
+anim_save("mn_avg_mean_median.gif", ggplot(mn_full %>% arrange(State)) +
+  geom_histogram(aes(avg_mean_median), bins = 2500) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Minnesota Complete Ensemble \nAverage Mean Median Score", x= "Mean Median", y="Map Count")+
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text()))
+
+anim_save("mn_avg_dem_seats.gif", ggplot(mn_full %>% arrange(State)) +
+  geom_bar(aes(avg_d_seats)) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Minnesota Complete Ensemble \nAverage Number of Democratic Seats", x= "Number of Democratic Seats", y="Map Count")+
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text()))
+
+anim_save("mn_avg_rep_seats.gif", ggplot(mn_full %>% arrange(State)) +
+  geom_bar(aes(avg_r_seats)) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Minnesota Complete Ensemble \nAverage Number of Republican Seats", x="Number of Republican Seats", y="Map Count")+
+  theme_fivethirtyeight() +
+  theme(plot.background = element_rect(fill="white"), panel.background = element_rect(fill="white"), legend.background = element_rect(fill="white"), legend.key = (element_rect(fill = "white")), legend.title = element_blank(), axis.title = element_text()))
+```
+

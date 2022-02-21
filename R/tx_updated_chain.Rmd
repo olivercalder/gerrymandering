@@ -1,0 +1,188 @@
+---
+title: "tx_updated_chain"
+author: "Eva Airoldi"
+date: "1/27/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+#partisan bias needs to be fixed
+#fix district tidy
+```{r read_in}
+tx1 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_2/results_TX1.csv") %>%
+  mutate(chain = 1)
+tx2 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_2/results_TX2.csv") %>%
+  mutate(chain=2)
+tx3 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_2/results_TX3.csv")%>%
+  mutate(chain = 3)
+tx4 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_2/results_TX4.csv")%>%
+  mutate(chain = 4)
+tx5 <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Data/results_2/results_TX5.csv")%>%
+  mutate(chain = 5)
+
+tx <- rbind(tx1, tx2, tx3, tx4, tx5)
+tx <- tx %>% mutate(Map = 1:nrow(tx))
+
+#write_csv(tx, "tx_bound.csv")
+
+tx <- read_csv("/Users/evaairoldi/Desktop/Comps/gerrymanderingComps/Texas/tx_bound.csv")
+```
+
+```{r tx_tidy_pres16}
+tx_tidy_pres16 <- tx %>% select(State, starts_with("avg"), starts_with("PRES16"), chain, Map) %>%
+    pivot_longer(!c(State,
+                  Map,
+                  chain,
+                  avg_efficiency_gap, 
+                  avg_partisan_bias, 
+                  avg_mean_median, 
+                  avg_partisan_gini, 
+                  avg_d_seats, 
+                  avg_r_seats,
+                  PRES16_partisan_bias,
+                  PRES16_efficiency_gap,
+                  PRES16_partisan_gini,
+                  PRES16_mean_median,
+                  PRES16_d_seats,
+                  PRES16_r_seats),
+                 names_prefix = "PRES16_",
+               names_to = c(".value", "district"),
+               names_sep = -1) 
+
+tx_tidy_pres16 <- tx_tidy_pres16 %>% mutate(voteshareD = d_count_/(r_count_ + d_count_),
+                         voteshareR = r_count_/(r_count_+d_count_))
+```
+
+```{r Bekka_plot_stuff}
+district_ordered <- tx_tidy_pres16 %>% select(State, Map, chain, voteshareD, voteshareR, district) %>% group_by(Map) %>% arrange((voteshareD), .by_group = TRUE) %>% mutate(districtOrder = 1:10) %>%
+  mutate(districtOrder = as.factor(districtOrder))
+
+ggplot(district_ordered) +
+  geom_boxplot(aes(x = districtOrder, y=voteshareD)) +
+  labs(title = "Texas 2016 Presidential Election Ensemble", subtitle = "Ordered from smallest district in each map to largest")
+```
+
+```{r basic_avg_histograms}
+pdf("tx_updated_avg_histograms.pdf")
+ggplot(tx) +
+  geom_histogram(aes(avg_efficiency_gap), bins = 2500) +
+  labs(title= "Texas Ensemble Avgerage Efficiency Gap") 
+
+ggplot(tx) +
+  geom_histogram(aes(x =avg_partisan_bias), bins = 75) +
+  labs(title= "Texas Ensemble Average Partisan Bias")
+
+ggplot(tx) +
+  geom_histogram(aes(avg_mean_median), bins = 2500) +
+  labs(title = "Texas Ensmble Average Mean Median")
+
+ggplot(tx) +
+  geom_histogram(aes(avg_partisan_gini), bins = 2500) +
+  labs(title = "Texas Ensmble Average Partisan Gini")
+
+ggplot(tx) +
+  geom_bar(aes(x=avg_d_seats)) +
+  labs(title = "Texas Ensmble Average Democratic Seats")
+
+ggplot(tx) +
+  geom_bar(aes(x=avg_r_seats)) +
+  labs(title = "Texas Ensmble Average Republican Seats")
+dev.off()
+```
+
+```{r pres16_histograms}
+pdf("tx_updated_pres16_histograms.pdf")
+ggplot(tx) +
+  geom_histogram(aes(PRES16_efficiency_gap), bins = 2500) +
+  labs(title= "Texas Ensemble Efficiency Gap for 2016 Presidential Election") 
+
+ggplot(tx) +
+  geom_bar(aes(x =PRES16_partisan_bias)) +
+  labs(title= "Texas Ensemble Partisan Bias for 2016 Presidential Election")
+
+ggplot(tx) +
+  geom_histogram(aes(PRES16_mean_median), bins = 2500) +
+  labs(title = "Texas Ensmble Mean Median for 2016 Presidential Election")
+
+ggplot(tx) +
+  geom_histogram(aes(PRES16_partisan_gini), bins = 2500) +
+  labs(title = "Texas Ensmble Partisan Gini for 2016 Presidential Election")
+
+ggplot(tx) +
+  geom_bar(aes(x=PRES16_d_seats)) +
+  labs(title = "Texas Ensmble Democratic Seats for 2016 Presidential Election")
+
+ggplot(tx) +
+  geom_bar(aes(x=PRES16_r_seats)) +
+  labs(title = "Texas Ensmble Republican Seats for 2016 Presidential Election")
+dev.off()
+```
+
+```{r ensemble_score_histograms}
+pdf("tx_updated_ensemble_score_histograms.pdf")
+ggplot(tx) +
+  geom_histogram(aes(total_score), bins = 1000) +
+  labs(title = "Texas Ensmble Total Score")
+
+ggplot(tx) +
+  geom_histogram(aes(population_score), bins=1500) +
+  labs(title = "Texas Ensmble Population Score")
+
+ggplot(tx) +
+  geom_histogram(aes(compactness_score), bins = 1500) +
+  labs(title = "Texas Ensmble Compactness Score")
+
+ggplot(tx) +
+  geom_histogram(aes(county_score), bins = 1500) +
+  xlim(0,1500) +
+  labs(title = "Texas Ensmble County Score")
+
+dev.off()
+```
+
+```{r animated_histograms}
+avfeg <- ggplot(tx %>% arrange(State)) +
+  geom_histogram(aes(avg_efficiency_gap), bins = 2500) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Texas Complete Ensemble Average Efficiency Gap", x="Average Efficiency Gap")
+
+anim_save("tx_avg_efficiency_gap_histogram.gif", avfeg)
+
+#avgpb <- ggplot(mn %>% arrange(State)) +
+#  geom_bar(aes(avg_partisan_bias)) +
+#  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+ # labs(title = "txio Complete Ensemble Average Partisan Bias", x="Average Partisan Bias")
+
+#anim_save("tx_avg_partisan_bias_histogram.gif", avgpb)
+
+avgpg <- ggplot(tx %>% arrange(State)) +
+  geom_histogram(aes(avg_partisan_gini), bins = 2500) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Texas Complete Ensemble Average Partisan Gini", x="Average Partisan Gini")
+
+anim_save("tx_avg_partisan_gini_histogram.gif", avgpg)
+
+avgmm <- ggplot(tx %>% arrange(State)) +
+  geom_histogram(aes(avg_mean_median), bins = 2500) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Texas Complete Ensemble Average Mean Median Score", x="Average Mean Median Score")
+
+anim_save("tx_avg_mean_median_histogram.gif", avgmm)
+
+avgd <- ggplot(tx %>% arrange(State)) +
+  geom_bar(aes(avg_d_seats)) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Texas Complete Ensemble Average Number of Democratic Seats", x="Average Number of Democratic Seats")
+
+anim_save("tx_avg_dem_seats_histogram.gif", avgd)
+
+avgr <- ggplot(tx %>% arrange(State)) +
+  geom_bar(aes(avg_r_seats)) +
+  transition_layers(layer_length = 1, transition_length = 1) + enter_grow() +
+  labs(title = "Texas Complete Ensemble Average Number of Republican Seats", x="Average Number of Republican Seats")
+
+anim_save("tx_avg_rep_seats_histogram.gif", avgr)
+```
